@@ -5,11 +5,11 @@ export const DoctorLogin = (req, res) => {
             expiresAt: 1678118400000, // Replace with the actual timestamp in milliseconds
             uid: "user_id_here",
             user: {
-                id: "user_id_here",
+                _id: "user_id_here",
                 username: "example_user",
                 email: "user@example.com",
                 name: "John Doe",
-                avatar_url: "https://example.com/avatar.jpg"
+                displayPicture: "https://example.com/avatar.jpg"
             },
             message: "Login successful"
             };
