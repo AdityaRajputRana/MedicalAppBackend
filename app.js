@@ -3,10 +3,12 @@ import 'dotenv/config'
 import { AuthRouter } from './routers/AuthRouter.js';
 import mongoose from 'mongoose';
 import Staff from './models/staff.js';
+import { APIRouter } from './routers/ApiRouter.js';
 
 
 
 const app = express();
+app.use(express.json());
 
 app.get('/', (req, res) => {
     res.status(200)
@@ -14,6 +16,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/auth', AuthRouter);
+app.use('/api', APIRouter);
 
 
 

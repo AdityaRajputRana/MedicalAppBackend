@@ -14,9 +14,11 @@ async function generateJWT(staff) {
     const expiresIn = 7 * 24 * 60 * 60;
 
     const currentTimestamp = Date.now();
-    const expiresAt = currentTimestamp + expiresIn * 1000;
+    let expiresAt = currentTimestamp + expiresIn * 1000;
+    expiresAt = expiresAt/1000;
 
     let token = await jwt.sign({ data }, process.env.JWT_SECRET, { expiresIn });
+    expiresAt *= 1000;
     return {
         token, expiresAt
     }
