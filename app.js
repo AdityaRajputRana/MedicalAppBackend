@@ -1,6 +1,9 @@
 import express from 'express';
 import 'dotenv/config'
-import {AuthRouter} from './routers/AuthRouter.js';
+import { AuthRouter } from './routers/AuthRouter.js';
+import mongoose from 'mongoose';
+import Staff from './models/staff.js';
+
 
 
 const app = express();
@@ -11,6 +14,19 @@ app.get('/', (req, res) => {
 })
 
 app.use('/auth', AuthRouter);
+
+
+
+const mongoConnUri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@cluster0.p0orpnl.mongodb.net/?retryWrites=true&w=majority`;
+mongoose.connect(mongoConnUri);
+const db = mongoose.connection;
+db.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+db.once('open', () => {
+    console.log('Connected to MongoDB');
+});
+
 
 
 app.listen(process.env.PORT, () => {

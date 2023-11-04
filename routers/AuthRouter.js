@@ -1,10 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import  {DoctorLogin} from "../controllers/AuthCtrl.js";
+import  {StaffLogin, StaffSignup} from "../controllers/AuthCtrl.js";
 
 const AuthRouter = express.Router();
-AuthRouter.use(bodyParser.json());
+AuthRouter.use(express.json());
 
-AuthRouter.post("/login", DoctorLogin);
+AuthRouter.post("/login", StaffLogin);
+AuthRouter.post("/signUpStaff", StaffSignup);
 
 export { AuthRouter };
