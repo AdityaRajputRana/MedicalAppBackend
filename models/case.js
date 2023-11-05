@@ -2,7 +2,15 @@ import mongoose, { mongo } from "mongoose";
 
 const caseSchema = new mongoose.Schema({
   patientId: String,
-  firstVisit: Number,
+  patient: {
+    id: String,
+    mobileNumber: Number,
+    fullName: String,
+    gender: String,
+    email: String
+  },
+  mobileNumber: Number,
+  email: String,
   hospitalId: mongoose.Schema.ObjectId,
   doctorId: mongoose.Schema.ObjectId
 });

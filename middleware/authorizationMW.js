@@ -18,18 +18,10 @@ export default async (req, res, next) => {
                     }
                     req.uid = decoded.data.uid;
                     req.role = decoded.data.role;
+                    req.hospitalId = decoded.data.hospitalId;
                     const currentTime = Date.now();
                     if (decoded.exp*1000 < currentTime) {
                         sendResponse(false, "Token expired, please login again", {
-                            tokenExp: true,
-                            loginAgain: true,
-                            expiredAt: decoded.exp * 1000,
-                            issuedAt: decoded.iat * 1000,
-                            currentTime: currentTime
-                        }, res);
-                        return;
-                    } else {
-                        sendResponse(true, "token valid", {
                             tokenExp: true,
                             loginAgain: true,
                             expiredAt: decoded.exp * 1000,

@@ -1,13 +1,17 @@
 import mongoose from "mongoose";
 
 const pageSchema = new mongoose.Schema({
-  patientId: String,
-  firstVisit: Number,
-  hospitalId: mongoose.Schema.ObjectId,
+  patientId: String, //Todo: Update this to Object id with Reference
+  hospitalId: String, //Todo: Update this to Object id with Reference
+  creatorId: mongoose.Schema.ObjectId,
   doctorId: mongoose.Schema.ObjectId,
+  createdAt: Number,
+  updatedAt: Number,
   pageNumber: Number,
   width: Number,
   height: Number,
+  pageType: String,
+  mobileNumber: Number,
   points: [
     {
       x: Number,
