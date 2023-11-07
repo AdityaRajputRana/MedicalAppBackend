@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const pageSchema = new mongoose.Schema({
   patientId: String, //Todo: Update this to Object id with Reference
   hospitalId: String, //Todo: Update this to Object id with Reference
+  caseId: String,
   creatorId: mongoose.Schema.ObjectId,
   doctorId: mongoose.Schema.ObjectId,
   createdAt: Number,
