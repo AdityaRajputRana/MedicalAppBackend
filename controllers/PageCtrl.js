@@ -1,4 +1,4 @@
-import { defaultPageType } from "../config.js";
+import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
 import Page from "../models/page.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -6,8 +6,8 @@ import 'dotenv/config'
 async function initialisePage(req, res) {
     let hospitalId = req.hospitalId;
     let pageNumber = req.body.pageNumber;
-    let width = req.body.pageWidth;
-    let height = req.body.pageHeight;
+    let width = defaultPageWidth;
+    let height = defaultPageHeight;
 
     let page = await Page.findOne({
         hospitalId: hospitalId,
