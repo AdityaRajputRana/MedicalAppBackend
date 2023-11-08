@@ -59,7 +59,7 @@ async function initialisePage(req, res) {
 
 async function uploadPointsToPage(req, res) {
     let pageNumber = req.body.pageNumber;
-    let hospitalId = req.body.hospitalId;
+    let hospitalId = req.hospitalId;
     let pointsToAdd = req.body.pointsToAdd;
 
     let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId }).catch(err => sendError(res, err, "Finding page"));
@@ -79,7 +79,7 @@ async function uploadPointsToPage(req, res) {
         sendReponse(true, "Points saved successfully", {}, res);
         return;
     } else {
-        sendReponse(false, "Invalid page id", {}, res);
+        sendReponse(false, "Invalid page number", {hospitalId: hospitalId}, res);
         return;
     }
 }
