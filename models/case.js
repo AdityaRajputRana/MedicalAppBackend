@@ -12,7 +12,7 @@ const caseSchema = new mongoose.Schema({
   mobileNumber: Number,
   email: String,
   updatedAt: Number,
-  hospitalId: mongoose.Schema.ObjectId,
+  hospitalId: String,
   doctorId: mongoose.Schema.ObjectId,
   creatorId: mongoose.Schema.ObjectId,
   pageCount: Number,
