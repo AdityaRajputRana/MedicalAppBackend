@@ -1,11 +1,31 @@
 import Case from "../models/case.js"
+import Page from "../models/page.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
 import { paginationLimit } from "../config.js";
 
-async function mergeCases() {
+async function mergeCases(req, res) {
+    const { fromCaseId, toCaseId } = req.body;
+    const { hospitalId } = req;
+    const updateResult = await Page.updateMany({ caseId: fromCaseId, hospitalId: hospitalId }, { $set: { caseId: toCaseId } })
+        .catch(err=>sendError(res, err, "Merging pages"));
+
+    const updatedCount = updateResult.nModified;
+
+    await Case.updateOne(
+        {
+            _id: toCaseId,
+            hospitalId: hospitalId
+        },
+      { $inc: { totalPages: updatedCount } }
+    ).catch(err => sendError(res, err, "updating total pages"));
     
+    await Case.deleteOne({ _id: fromCaseId, hospitalId: hospitalId })
+        .catch(err => sendError(res, err, "Deleting old case"));
+    
+    sendReponse(true, "Cases merged successfully", {}, res);
 }
+
 
 async function getCasesHistory(req, res) {
     let hospitalId = req.hospitalId;

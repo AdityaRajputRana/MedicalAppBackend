@@ -14,7 +14,7 @@ APIRouter.post("/page/addPoints", uploadPointsToPage);
 APIRouter.post("/page/addDetails", addDetails);
 APIRouter.post("/page/changeCase", changeCase); //Todo
 
-APIRouter.post("/case/merge", mergeCases); //Todo
-APIRouter.post("/case/history", getCasesHistory) //Todo
+APIRouter.post("/case/merge", mergeCases); 
+APIRouter.post("/case/history", getCasesHistory);
 
 export { APIRouter };

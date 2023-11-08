@@ -94,6 +94,8 @@ async function addDetails(req, res) {
 
     let doctorId = req.body.doctorId;
     
+    let hospitalId = req.hospitalId;
+    
 
     //Todo: link to patient if patient is already available
     let page = await Page.findOne({
