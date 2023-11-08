@@ -58,11 +58,11 @@ async function initialisePage(req, res) {
 }
 
 async function uploadPointsToPage(req, res) {
-    let pageId = req.body.pageId;
+    let pageNumber = req.body.pageNumber;
     let hospitalId = req.body.hospitalId;
     let pointsToAdd = req.body.pointsToAdd;
 
-    let page = await Page.findOne({ _id: pageId }).catch(err => sendError(res, err, "Finding page"));
+    let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId }).catch(err => sendError(res, err, "Finding page"));
     if (page) {
         for (var i = 0; i < pointsToAdd.length; i++){
             page.points.push(pointsToAdd[i]);
