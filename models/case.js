@@ -13,6 +13,8 @@ const caseSchema = new mongoose.Schema({
   email: String,
   updatedAt: Number,
   hospitalId: String,
+  fullName: String,
+  gender: String,
   doctorId: mongoose.Schema.ObjectId,
   creatorId: mongoose.Schema.ObjectId,
   pageCount: Number,

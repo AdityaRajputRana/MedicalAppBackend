@@ -13,6 +13,9 @@ const pageSchema = new mongoose.Schema({
   height: Number,
   pageType: String,
   mobileNumber: Number,
+  fullName: String,
+  email: String,
+  gender: String,
   points: [
     {
       x: Number,
