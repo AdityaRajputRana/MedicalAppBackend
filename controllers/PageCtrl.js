@@ -28,7 +28,9 @@ async function initialisePage(req, res) {
         let mCase = new Case({
             hospitalId: hospitalId,
             creatorId: req.body.uid,
-            pageCount: 1
+            pageCount: 1,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
         });
         await mCase.save().catch(err => sendError(res, err, "saving case"));
         page = new Page({
@@ -58,10 +60,9 @@ async function initialisePage(req, res) {
 async function uploadPointsToPage(req, res) {
     let pageId = req.body.pageId;
     let hospitalId = req.body.hospitalId;
-    let pointsToAdd = req.body.points;
+    let pointsToAdd = req.body.pointsToAdd;
 
     let page = await Page.findOne({ _id: pageId }).catch(err => sendError(res, err, "Finding page"));
-
     if (page) {
         for (var i = 0; i < pointsToAdd.length; i++){
             page.points.push(pointsToAdd[i]);
@@ -71,7 +72,11 @@ async function uploadPointsToPage(req, res) {
             sendError(res, err, "Saving Page");
             return;
         });
-        sendReponse(false, "Points saved successfully", {}, res);
+
+        if (page.caseId) {
+            Case.updateOne({ _id: page.caseId }, { updatedAt: Date.now() });
+        }
+        sendReponse(true, "Points saved successfully", {}, res);
         return;
     } else {
         sendReponse(false, "Invalid page id", {}, res);
@@ -86,6 +91,8 @@ async function addDetails(req, res) {
     let fullName = req.body.fullName;
     let email = req.body.email;
     let pageId = req.body.pageId;
+
+    let doctorId = req.body.doctorId;
     
 
     //Todo: link to patient if patient is already available
@@ -98,7 +105,9 @@ async function addDetails(req, res) {
             mCase = new Case({
                 hospitalId: hospitalId,
                 creatorId: req.body.uid,
-                pageCount: 1
+                pageCount: 1,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             });
             await mCase.save().catch(err => sendError(res, err, "saving case"));
         }
@@ -118,6 +127,13 @@ async function addDetails(req, res) {
             page.email = email;
             mCase.email = email;
         }
+        if (doctorId) {
+            page.doctorId = doctorId;
+            mCase.doctorId = doctorId;
+        }
+
+        page.updatedAt = Date.now();
+        mCase.updatedAt = Date.now();
 
         await page.save().catch(err => {
             sendError(res, err, "Saving page");
@@ -134,11 +150,15 @@ async function addDetails(req, res) {
     }
 }
 
+async function changeCase(req, res) {
+    
+}
+
 
 
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails };
+export { initialisePage, uploadPointsToPage, addDetails, changeCase };
 
 

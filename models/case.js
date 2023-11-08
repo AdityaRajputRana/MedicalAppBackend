@@ -11,11 +11,15 @@ const caseSchema = new mongoose.Schema({
   },
   mobileNumber: Number,
   email: String,
+  updatedAt: Number,
   hospitalId: mongoose.Schema.ObjectId,
   doctorId: mongoose.Schema.ObjectId,
   creatorId: mongoose.Schema.ObjectId,
   pageCount: Number,
-  previewImg: String
+  previewImg: String,
+
+  createdAt: Number,
+  updatedAt: Number
 });
 
 const Case = mongoose.model('Case', caseSchema);
