@@ -27,7 +27,8 @@ async function initialisePage(req, res) {
     } else {
         let mCase = new Case({
             hospitalId: hospitalId,
-            creatorId: req.body.uid
+            creatorId: req.body.uid,
+            pageCount: 1
         });
         await mCase.save().catch(err => sendError(res, err, "saving case"));
         page = new Page({
@@ -96,7 +97,8 @@ async function addDetails(req, res) {
         } else {
             mCase = new Case({
                 hospitalId: hospitalId,
-                creatorId: req.body.uid
+                creatorId: req.body.uid,
+                pageCount: 1
             });
             await mCase.save().catch(err => sendError(res, err, "saving case"));
         }
