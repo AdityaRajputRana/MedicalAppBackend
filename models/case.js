@@ -12,7 +12,8 @@ const caseSchema = new mongoose.Schema({
   mobileNumber: Number,
   email: String,
   hospitalId: mongoose.Schema.ObjectId,
-  doctorId: mongoose.Schema.ObjectId
+  doctorId: mongoose.Schema.ObjectId,
+  creatorId: mongoose.Schema.ObjectId
 });
 
 const Case = mongoose.model('Case', caseSchema);

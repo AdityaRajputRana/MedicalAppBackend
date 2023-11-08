@@ -1,4 +1,5 @@
 import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
+import Case from "../models/case.js";
 import Page from "../models/page.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -24,8 +25,13 @@ async function initialisePage(req, res) {
         }
         sendReponse(true, "", data, res);
     } else {
-        //make a new case and link this page to the case.
+        let mCase = new Case({
+            hospitalId: hospitalId,
+            creatorId: req.body.uid
+        });
+        await mCase.save().catch(err => sendError(res, err, "saving case"));
         page = new Page({
+            caseId: mCase._id,
             hospitalId: hospitalId,
             creatorId: req.body.uid,
             createdAt: Date.now(),
@@ -82,19 +88,42 @@ async function addDetails(req, res) {
     
 
     //Todo: link to patient if patient is already available
-    let page = await Page({ _id: pageId }).catch(err => sendError(res, err, "finding page"));
+    let page = await Page.findOne({ _id: pageId }).catch(err => sendError(res, err, "finding page"));
     if (page) {
-        if (mobileNumber)
+        let mCase;
+        if (page.caseId) {
+            mCase = await Case.findOne({ _id: page.caseId }).catch(err => sendError(res, err, "finding case"));
+        } else {
+            mCase = new Case({
+                hospitalId: hospitalId,
+                creatorId: req.body.uid
+            });
+            await mCase.save().catch(err => sendError(res, err, "saving case"));
+        }
+        if (mobileNumber) {
             page.mobileNumber = mobileNumber;
-        if (gender)
+            mCase.mobileNumber = mobileNumber;
+        }
+        if (gender) {
             page.gender = gender;
-        if (fullName)
+            mCase.gender = gender;
+        }
+        if (fullName) {
             page.fullName = fullName;
-        if (email)
+            mCase.fullName = fullName;
+        }
+        if (email) {
             page.email = email;
+            mCase.email = email;
+        }
 
         await page.save().catch(err => {
             sendError(res, err, "Saving page");
+            return;
+        })
+
+        await mCase.save().catch(err => {
+            sendError(res, err, "Saving case");
             return;
         })
         sendReponse(true, "Page saved successfully", {}, res);
@@ -108,6 +137,6 @@ async function addDetails(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage };
+export { initialisePage, uploadPointsToPage, addDetails };
 
 
