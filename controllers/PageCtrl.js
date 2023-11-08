@@ -90,13 +90,16 @@ async function addDetails(req, res) {
     let gender = req.body.gender;
     let fullName = req.body.fullName;
     let email = req.body.email;
-    let pageId = req.body.pageId;
+    let pageNumber = req.body.pageNumber;
 
     let doctorId = req.body.doctorId;
     
 
     //Todo: link to patient if patient is already available
-    let page = await Page.findOne({ _id: pageId }).catch(err => sendError(res, err, "finding page"));
+    let page = await Page.findOne({
+        pageNumber: pageNumber,
+        hospitalId: hospitalId
+     }).catch(err => sendError(res, err, "finding page"));
     if (page) {
         let mCase;
         if (page.caseId) {
