@@ -19,7 +19,8 @@ const pageSchema = new mongoose.Schema({
   points: [
     {
       x: Number,
-      y: Number
+      y: Number,
+      actionType: Number
     }
   ]
 });
