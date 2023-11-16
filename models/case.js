@@ -21,7 +21,12 @@ const caseSchema = new mongoose.Schema({
   previewImg: String,
 
   createdAt: Number,
-  updatedAt: Number
+  updatedAt: Number,
+
+  pdf: {
+    publicUrl: String,
+    updatedAt: Number
+  }
 });
 
 const Case = mongoose.model('Case', caseSchema);

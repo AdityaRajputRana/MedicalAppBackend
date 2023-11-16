@@ -3,6 +3,7 @@ import Page from "../models/page.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
 import { paginationLimit } from "../config.js";
+import { makePdf } from "../utils/PdfGenerator.js";
 
 async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
@@ -67,7 +68,32 @@ async function getCasesHistory(req, res) {
 
 }
 
-export { mergeCases, getCasesHistory };
+async function submitCase(req, res) {
+    const { caseId } = req.body;
+
+    const pages = await Page.find({ caseId })
+        .catch(err => sendError(res, err, "Getting pages"));
+    
+    const url = await makePdf(pages, 100, 100, null, null)
+        .catch(err => sendError(res, err, "Generating pdf"));
+    
+    let pdf = {
+        publicUrl: url,
+        updatedAt: Date.now()
+    }
+    
+    await Case.updateOne({ _id: caseId }, {
+        $set: {
+            pdf
+        }
+    }).catch(err => sendError(res, err, "Updating Case"));
+    
+    sendReponse(true, "Submit Request Sent", {
+        pdfUrl: url
+    }, res);
+}
+
+export { mergeCases, getCasesHistory, submitCase };
 
 
 
