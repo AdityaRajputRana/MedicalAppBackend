@@ -114,6 +114,7 @@ export const verifyOTP = async (req, res) =>{
             isNewUser: user.isNewUser,
             name: user.fullName,
             displayPicture: user.displayPicture,
+            gender: user.gender,
             type: "Patient"
         }
     }
