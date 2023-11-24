@@ -5,6 +5,12 @@ const patientSchema = new mongoose.Schema({
   mobileNumber: String,
   age: Number,
   gender: String,
+  isAnonymous: Boolean,
+  isNewUser: Boolean,
+  loginAttempt: {
+    otp: Number,
+    timestamp: Number
+  }
 });
 
 const Patient = mongoose.model('Patient', patientSchema);

@@ -4,6 +4,7 @@ import { AuthRouter } from './routers/AuthRouter.js';
 import mongoose from 'mongoose';
 import Staff from './models/staff.js';
 import { APIRouter } from './routers/ApiRouter.js';
+import PatientRouter from './routers/PatientRouter.js';
 
 
 
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', AuthRouter);
 app.use('/api', APIRouter);
+app.use('/patient', PatientRouter);
 
 
 
