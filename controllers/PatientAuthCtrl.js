@@ -7,7 +7,7 @@ async function generateJWT(staff) {
     let data = {
         uid: staff._id,
         role: "patient",
-        phone: staff.phoneNumber
+        mobileNumber: staff.mobileNumber
     }
 
     const expiresIn = 7 * 24 * 60 * 60;

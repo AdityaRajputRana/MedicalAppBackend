@@ -18,6 +18,7 @@ export default async (req, res, next) => {
                     }
                     req.uid = decoded.data.uid;
                     req.role = decoded.data.role;
+                    req.mobileNumber = decoded.data.mobileNumber;
                     const currentTime = Date.now();
                     if (decoded.exp*1000 < currentTime) {
                         sendResponse(false, "Token expired, please login again", {

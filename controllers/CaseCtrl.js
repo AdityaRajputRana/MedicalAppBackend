@@ -84,7 +84,8 @@ async function submitCase(req, res) {
     
     await Case.updateOne({ _id: caseId }, {
         $set: {
-            pdf
+            pdf,
+            updatedAt: Date.now()
         }
     }).catch(err => sendError(res, err, "Updating Case"));
     
