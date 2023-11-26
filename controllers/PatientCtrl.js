@@ -113,6 +113,7 @@ export const viewCase = async (req, res) => {
         let mDoc;
         if (doctor) {
             mDoc = {
+                _id: doctor._id,
                 name: doctor.fullName,
                 displayPicture: doctor.displayPicture,
                 hospital: doctor.hospital,
