@@ -3,6 +3,8 @@ import Case from "../models/case.js";
 import sendReponse, { sendError } from "./ResponseCtrl.js";
 import 'dotenv/config'
 import { paginationLimit } from "../config.js";
+import { getFormattedDateTime } from "../utils/DateUtils.js";
+import Staff from "../models/staff.js";
 
 
 export const editPatientProfile = async (req, res) => {
@@ -97,4 +99,44 @@ export const getPatientPrescriptions = async (req, res) => {
     sendReponse(true, "Got Prescriptions", data, res);
     
     
+}
+
+export const viewCase = async (req, res) => {
+    let caseId = req.body.caseId;
+    let mobileNumber = req.mobileNumber;
+
+    let mCase = await Case.findOne({ _id: caseId, mobileNumber: mobileNumber })
+        .catch(err => sendError(res, err, "Fetching case"));
+    let doctor = await Staff.findOne({ _id: mCase.doctorId })
+        .catch(err => sendError(res, err, "Finding doctor"));
+    if (mCase) {
+        let mDoc;
+        if (doctor) {
+            mDoc = {
+                name: doctor.fullName,
+                displayPicture: doctor.displayPicture,
+                hospital: doctor.hospital,
+                title: doctor.title
+            }
+        }
+        let data = {
+            _id: mCase.id,
+            updatedAt: getFormattedDateTime(mCase.updatedAt),
+            diagnosis: "OPD",
+            documents: [
+                {
+                    title: "Doctor's Prescription",
+                    type: "PDF",
+                    url: mCase.pdf.publicUrl,
+                }
+            ],
+            doctor: mDoc,
+            additionals:[]
+
+        }
+
+        sendReponse(true, "", data, res);
+    } else {
+        sendReponse(false, "Case Not Found", {}, res);
+    }
 }

@@ -27,7 +27,8 @@ async function initialisePage(req, res) {
     } else {
         let mCase = new Case({
             hospitalId: hospitalId,
-            creatorId: req.body.uid,
+            creatorId: req.uid,
+            doctorId: req.uid, //Todo: This should be updated after adding associates
             pageCount: 1,
             createdAt: Date.now(),
             updatedAt: Date.now()
@@ -36,7 +37,8 @@ async function initialisePage(req, res) {
         page = new Page({
             caseId: mCase._id,
             hospitalId: hospitalId,
-            creatorId: req.body.uid,
+            creatorId: req.uid,
+            doctorId: req.uid,
             createdAt: Date.now(),
             updatedAt: Date.now(),
             pageNumber: pageNumber,
