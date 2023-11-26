@@ -111,6 +111,11 @@ export const viewCase = async (req, res) => {
         .catch(err => sendError(res, err, "Finding doctor"));
     if (mCase) {
         let mDoc;
+        let patient = {
+            name: mCase.fullName,
+            age: mCase.age,
+            gender: (mCase.gender == "M")? "Male":"Female"
+        }
         if (doctor) {
             mDoc = {
                 _id: doctor._id,
@@ -124,6 +129,7 @@ export const viewCase = async (req, res) => {
             _id: mCase.id,
             updatedAt: getFormattedDateTime(mCase.updatedAt),
             diagnosis: "OPD",
+            patient: patient,
             documents: [
                 {
                     title: "Doctor's Prescription",
