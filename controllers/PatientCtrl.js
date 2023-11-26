@@ -67,7 +67,7 @@ export const getPatientHome = async (req, res) => {
 }
 
 export const getPatientPrescriptions = async (req, res) => {
-    const mobileNumber = req.body.mobileNumber;
+    const mobileNumber = req.mobileNumber;
     const pageNumber = parseInt(req.body.pageNumber) || 1;
 
     const totalCases = await Case.countDocuments({
