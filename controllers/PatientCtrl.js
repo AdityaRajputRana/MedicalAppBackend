@@ -126,6 +126,7 @@ export const viewCase = async (req, res) => {
             }
         }
         let data = {
+            title: "Regular Visit",
             _id: mCase.id,
             updatedAt: getFormattedDateTime(mCase.updatedAt),
             diagnosis: "OPD",
