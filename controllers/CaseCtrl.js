@@ -1,9 +1,11 @@
 import Case from "../models/case.js"
 import Page from "../models/page.js";
+import Staff from "../models/staff.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
 import { paginationLimit } from "../config.js";
 import { makePdf } from "../utils/PdfGenerator.js";
+import { getFormattedDateTime } from "../utils/DateUtils.js";
 
 async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
@@ -84,8 +86,7 @@ async function submitCase(req, res) {
     
     await Case.updateOne({ _id: caseId }, {
         $set: {
-            pdf,
-            updatedAt: Date.now()
+            pdf
         }
     }).catch(err => sendError(res, err, "Updating Case"));
     
@@ -94,7 +95,70 @@ async function submitCase(req, res) {
     }, res);
 }
 
-export { mergeCases, getCasesHistory, submitCase };
+
+async function viewCase(req, res) {
+    const { caseId } = req.body;
+
+    let mCase = await Case.findOne({ _id: caseId})
+        .catch(err => sendError(res, err, "Fetching case"));
+    
+    let doctor = await Staff.findOne({ _id: mCase.doctorId })
+        .catch(err => sendError(res, err, "Finding doctor"));
+    
+    let pages = await Page.find({ caseId: caseId })
+        .catch(err => sendError(res, err, "Getting Pages"));
+    
+    let documents = [];
+    let shareRequired = true;
+
+    if (mCase.pdf) {
+        documents.push({
+            title: "Doctor's Prescription",
+            type: "PDF",
+            url: mCase.pdf.publicUrl,
+        });
+        if (mCase.pdf.updatedAt >= mCase.updatedAt) {
+            shareRequired = false;
+        }
+    }
+    
+    if (mCase) {
+        let mDoc;
+        let patient = {
+            name: mCase.fullName,
+            age: mCase.age,
+            gender: (mCase.gender == "M")? "Male":"Female"
+        }
+        if (doctor) {
+            mDoc = {
+                _id: doctor._id,
+                name: doctor.fullName,
+                displayPicture: doctor.displayPicture,
+                hospital: doctor.hospital,
+                title: doctor.title
+            }
+        }
+        let data = {
+            title: "Regular Visit",
+            _id: mCase.id,
+            updatedAt: getFormattedDateTime(mCase.updatedAt),
+            diagnosis: "OPD",
+            patient: patient,
+            documents,
+            doctor: mDoc,
+            pages: pages,
+            shareRequired: shareRequired,
+            additionals:[]
+
+        }
+
+        sendReponse(true, "", data, res);
+    } else {
+        sendReponse(false, "Case Not Found", {}, res);
+    }
+}
+
+export { mergeCases, getCasesHistory, submitCase, viewCase };
 
 
 

@@ -3,7 +3,7 @@ import { getHome } from '../controllers/DoctorCtrl.js';
 import '../controllers/PageCtrl.js'
 import AuthorizationMW from '../middleware/authorizationMW.js';
 import { addDetails, initialisePage, uploadPointsToPage, changeCase } from '../controllers/PageCtrl.js';
-import { getCasesHistory, mergeCases, submitCase } from '../controllers/CaseCtrl.js';
+import { getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 
 const APIRouter = express.Router();
 APIRouter.use(AuthorizationMW);
@@ -17,5 +17,6 @@ APIRouter.post("/page/changeCase", changeCase); //Todo
 APIRouter.post("/case/merge", mergeCases); 
 APIRouter.post("/case/history", getCasesHistory);
 APIRouter.post("/case/submit", submitCase);
+APIRouter.post("/case/view", viewCase);
 
 export { APIRouter };
