@@ -1,4 +1,5 @@
 import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
+import HospitalsPatient from "../models/HospitalsPatient.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
@@ -161,11 +162,59 @@ async function changeCase(req, res) {
     
 }
 
+async function addMobileNumber(req, res) {
+    let hospitalId = req.hospitalId;
+    let mobileNumber = req.body.mobileNumber;
+    let pageNumber = req.body.pageNumber;
+    let doctorId = req.body.doctorId;
+    let staffId = req.uid;
+
+    let page = await Page.findOne({
+        pageNumber: pageNumber,
+        hospitalId: hospitalId
+    }).catch(err => sendError(res, err, "finding page"));
+    
+    if (page) {
+        let mCase;
+        if (page.caseId) {
+            mCase = await Case.findOne({ _id: page.caseId }).catch(err => sendError(res, err, "finding case"));
+        }
+
+        if (mobileNumber) {
+            page.mobileNumber = mobileNumber;
+            page.updatedAt = Date.now();
+        }
+
+        let hospitalPatients = await HospitalsPatient.find(
+            { mobileNumber: mobileNumber, hospitalId: hospitalId }
+        ).catch(err => sendError(res, err, "Finding Hospital's patient"));
+
+        for (const patient of hospitalPatients) {
+            const openCases = await Case.find({
+                hospitalPatient: patient._id,
+                isOpen: true
+            });
+
+            patient.openCases = openCases;
+        }
+
+        let data = {
+            patients: hospitalPatients
+        }
+
+        sendReponse(true, "Phone number linked and got related patients", data, res);
+
+    } else {
+        sendReponse(false, "Page not found", {}, res);
+    }
+
+}
+
 
 
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase };
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber };
 
 

@@ -127,6 +127,7 @@ async function viewCase(req, res) {
         let patient = {
             name: mCase.fullName,
             age: mCase.age,
+            mobileNumber: mCase.mobileNumber,
             gender: (mCase.gender == "M")? "Male":"Female"
         }
         if (doctor) {

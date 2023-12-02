@@ -2,6 +2,8 @@ import mongoose, { mongo } from "mongoose";
 
 const caseSchema = new mongoose.Schema({
   patientId: String,
+  hospitalPatientId: String,
+  isOpen: Boolean,
   patient: {
     id: String,
     mobileNumber: Number,

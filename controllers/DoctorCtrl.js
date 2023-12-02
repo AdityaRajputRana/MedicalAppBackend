@@ -12,3 +12,12 @@ export const getHome = async (req, res) => {
     }
     sendReponse(true, "Home fetched", data, res);
 }
+
+export const getPatientHistory = async (req, res) => {
+    let data = {
+        naam: "Bhupendar Jogi",
+        americaMeKahaGhoomeHo: "Bohot jagah",
+        naamBatayiye: "Bhupendar Jogi"
+    }
+    sendReponse(true, "His fetched", data, res);
+}
