@@ -7,6 +7,7 @@ const patientSchema = new mongoose.Schema({
     gender: String,
     email: String,
     user: Number,
+    age: Number,
     updatedAt: Number,
     createdAt: Number,
     lastVisit: Number,

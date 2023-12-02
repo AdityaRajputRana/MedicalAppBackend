@@ -90,14 +90,20 @@ async function uploadPointsToPage(req, res) {
 
 async function addDetails(req, res) {
     let mobileNumber = req.body.mobileNumber;
+    if (!mobileNumber) {
+        sendReponse(false, "Mobile number is required in request", [], res);
+        return;
+    }
     let gender = req.body.gender;
     let fullName = req.body.fullName;
     let email = req.body.email;
     let pageNumber = req.body.pageNumber;
+    let age = req.body.age;
 
     let doctorId = req.body.doctorId;
     
     let hospitalId = req.hospitalId;
+    let staffId = req.uid;
     
 
     //Todo: link to patient if patient is already available
@@ -118,6 +124,7 @@ async function addDetails(req, res) {
                 updatedAt: Date.now()
             });
             await mCase.save().catch(err => sendError(res, err, "saving case"));
+            page.caseId = mCase.id;
         }
         if (mobileNumber) {
             page.mobileNumber = mobileNumber;
@@ -140,6 +147,18 @@ async function addDetails(req, res) {
             mCase.doctorId = doctorId;
         }
 
+        let patient = new HospitalsPatient({
+            mobileNumber,
+            age, gender, email, fullName, hospitalId, doctorId,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            creatorId: staffId
+        });
+
+        await patient.save();
+
+        page.hospitalPatientId = patient._id;
+        mCase.hospitalPatientId = patient._id;
         page.updatedAt = Date.now();
         mCase.updatedAt = Date.now();
 
@@ -166,8 +185,6 @@ async function addMobileNumber(req, res) {
     let hospitalId = req.hospitalId;
     let mobileNumber = req.body.mobileNumber;
     let pageNumber = req.body.pageNumber;
-    let doctorId = req.body.doctorId;
-    let staffId = req.uid;
 
     let page = await Page.findOne({
         pageNumber: pageNumber,
