@@ -171,7 +171,9 @@ async function addDetails(req, res) {
             sendError(res, err, "Saving case");
             return;
         })
-        sendReponse(true, "Page saved successfully", {}, res);
+        sendReponse(true, "Page saved successfully", {
+            patient: patient
+        }, res);
     } else {
         sendReponse(false, "Page not found", {}, res);
     }
@@ -227,11 +229,80 @@ async function addMobileNumber(req, res) {
 
 }
 
+async function linkPage(req, res) {
+    let hospitalPatientId = req.body.patientId;
+    let hospitalId = req.hospitalId;
+    let caseId = req.body.caseId;
+    let pageNumber = req.body.pageNumber;
+
+    let page = await Page.findOne({
+        pageNumber: pageNumber,
+        hospitalId: hospitalId
+    }).catch(err => sendError(res, err, "finding page"));
+
+    if (!caseId) {
+        let patient = await HospitalsPatient.findOne({ _id: hospitalPatientId })
+            .catch(err => sendError(res, err, "Getting Hospital Patient"));
+        const newCase = new Case({
+            hospitalId,
+            hospitalPatientId,
+            isOpen: true,
+            mobileNumber: patient.mobileNumber,
+            email: patient.email,
+            updatedAt: Date.now(),
+            fullName: patient.fullName,
+            gender: patient.gender,
+            doctorId: req.uid,
+            creatorId: req.uid,
+            pageCount: 0,
+            createdAt: Date.now()
+        });
+        await newCase.save();
+        caseId = newCase._id;
+    }
+
+    if (page) {
+        const prevCaseId = page.caseId;
+
+        page.caseId = caseId;
+        page.hospitalPatientId = hospitalPatientId;
+
+            if (page.caseId != caseId) {
+                if (page.caseId) {
+                    let oldCase = await Case.findOne({ _id: page.caseId })
+                        .catch(err => sendError(res, err, "Geting case document"));
+                    
+                    oldCase.pageCount -= 1;
+                    if (oldCase.pageCount <= 0) {
+                        await Case.findByIdAndDelete(prevCaseId); 
+                    } else {
+                        await oldCase.save();
+                    }
+
+                }
+
+                const newCase = await Case.findById(caseId);
+                if (newCase) {
+                    newCase.pageCount += 1;
+                    await newCase.save();
+                }
+            }
+        
+        await page.save()
+            .catch(err => sendError(res, err, "Saving page"));
+        
+        sendReponse(true, "patient linked", {}, res);
+    } else {
+        sendReponse(false, "Page not found", {}, res);
+    }
+    
+}
+
 
 
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber };
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage};
 
 
