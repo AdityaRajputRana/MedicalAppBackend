@@ -197,6 +197,8 @@ async function addMobileNumber(req, res) {
         let mCase;
         if (page.caseId) {
             mCase = await Case.findOne({ _id: page.caseId }).catch(err => sendError(res, err, "finding case"));
+            mCase.mobileNumber = mobileNumber;
+            await mCase.save();
         }
 
         if (mobileNumber) {
