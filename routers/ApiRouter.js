@@ -1,5 +1,5 @@
 import express from 'express';
-import { getHome, getPatientHistory } from '../controllers/DoctorCtrl.js';
+import { getHome, getPatientHistory, viewPatient } from '../controllers/DoctorCtrl.js';
 import '../controllers/PageCtrl.js'
 import AuthorizationMW from '../middleware/authorizationMW.js';
 import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage } from '../controllers/PageCtrl.js';
@@ -22,6 +22,7 @@ APIRouter.post("/case/submit", submitCase);
 APIRouter.post("/case/view", viewCase);
 
 APIRouter.post("/patients/list", getPatientHistory);
+APIRouter.post("/patients/view", viewPatient);
 
 
 export { APIRouter };

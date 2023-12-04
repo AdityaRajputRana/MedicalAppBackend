@@ -1,6 +1,8 @@
+import { paginationLimit } from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
+import Case from "../models/case.js";
 import Staff from "../models/staff.js";
-import sendReponse from "./ResponseCtrl.js";
+import sendReponse, { sendError } from "./ResponseCtrl.js";
 import 'dotenv/config'
 
 
@@ -17,6 +19,9 @@ export const getHome = async (req, res) => {
 export const getPatientHistory = async (req, res) => {
     let hospitalId = req.hospitalId;
     let { doctorId, creatorId, pageNumber } = req.body;
+    if (!pageNumber) {
+        pageNumber = 0;
+    }
     pageNumber = Math.max(1, pageNumber);
 
     const query = HospitalsPatient.find({});
@@ -51,4 +56,29 @@ export const getPatientHistory = async (req, res) => {
     sendReponse(true, "Patient history fetched", data, res);
     return;
 
+}
+
+export const viewPatient = async (req, res) => {
+    const hospitalId = req.hospitalId;
+    const patientId = req.body.patientId;
+
+
+    const patientDetails = await HospitalsPatient.findOne({ _id: patientId, hospitalId: hospitalId })
+        .catch(err => sendError(res, err, "Getting patient Details"));
+    
+    if (!patientDetails) {
+        sendReponse(false, "Patient is not found on hostpital's record", {}, res);
+    }
+
+    const patientCases = await Case.find({ hospitalPatientId: patientId })
+        .catch(err=>sendError(res, err, "Getting patient's cases"));
+
+    let data = {
+        patientDetails,
+        patientCases
+    }
+
+    sendReponse(true, "got it ", data, res);
+
+    
 }
