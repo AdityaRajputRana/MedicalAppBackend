@@ -1,3 +1,4 @@
+import HospitalsPatient from "../models/HospitalsPatient.js";
 import Staff from "../models/staff.js";
 import sendReponse from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -14,10 +15,40 @@ export const getHome = async (req, res) => {
 }
 
 export const getPatientHistory = async (req, res) => {
-    let data = {
-        naam: "Bhupendar Jogi",
-        americaMeKahaGhoomeHo: "Bohot jagah",
-        naamBatayiye: "Bhupendar Jogi"
+    let hospitalId = req.hospitalId;
+    let { doctorId, creatorId, pageNumber } = req.body;
+    pageNumber = Math.max(1, pageNumber);
+
+    const query = HospitalsPatient.find({});
+    if (hospitalId) {
+        query.where('hospitalId').equals(hospitalId);
     }
-    sendReponse(true, "His fetched", data, res);
+
+    if (doctorId) {
+        query.where('doctorId').equals(doctorId);
+    }
+
+    if (creatorId) {
+        query.where('creatorId').equals(creatorId);
+    }
+
+    const countQuery = query.model.find(query._conditions);
+    const totalCount = await countQuery.countDocuments().catch(err=>sendError(res, err,  "Counting documents"));
+
+    query.sort({ updatedAt: -1 });
+    query.skip((pageNumber - 1) * paginationLimit);
+    query.limit(paginationLimit);
+
+    const patients = await query.exec().catch(err=>sendError(res, err, "Fetching cases"));
+    const totalPages = Math.ceil(totalCount / paginationLimit);
+
+    let data = {
+        patients,
+        totalPages,
+        currentPage: pageNumber,
+    }
+
+    sendReponse(true, "Patient history fetched", data, res);
+    return;
+
 }
