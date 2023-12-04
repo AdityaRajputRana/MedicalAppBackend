@@ -20,9 +20,15 @@ async function initialisePage(req, res) {
     });
 
     if (page) {
+        let patientDetails;
+        if (page.hospitalPatientId) {
+            patientDetails = await HospitalsPatient.findOne({ _id: page.hospitalPatientId })
+                .catch(err => sendError(res, err, "Getting patient"));
+        }
         let data = {
             isNewPage: false,
-            page: page
+            page: page,
+            patient: patientDetails
         }
         sendReponse(true, "", data, res);
     } else {
