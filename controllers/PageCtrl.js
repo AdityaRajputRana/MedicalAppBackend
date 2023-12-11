@@ -2,6 +2,7 @@ import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.
 import HospitalsPatient from "../models/HospitalsPatient.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
+import { uploadToPermanentStorage } from "../utils/FileUploader.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
 
@@ -91,6 +92,42 @@ async function uploadPointsToPage(req, res) {
         sendReponse(false, "Invalid page number", {hospitalId: hospitalId}, res);
         return;
     }
+}
+
+async function addAdditional(req, res) {
+    console.log(req.body);
+    const hospitalId = req.hospitalId;
+    const data = JSON.parse(req.body.data);
+    console.log(data);
+    const pageNumber = data.pageNumber;
+    
+    const filePath = "doctorUploads/" + hospitalId +"/"+ pageNumber;
+    let metaData = {
+        type: data.metaData.type,
+        ext: data.metaData.ext,
+        mime: data.metaData.mime,
+        uploader: req.uid,
+        uploadedAt: Date.now()
+    }
+    const saveResult = await uploadToPermanentStorage(req.file.path, filePath, metaData);
+
+    const attachment = {
+        public_url: saveResult.publicUrl,
+        metaData,
+        details: saveResult
+    }
+
+    const page = await Page.findOne({ hospitalId: hospitalId, pageNumber: pageNumber });
+    const caseToUpdate = await Case.findOneAndUpdate(
+      { _id: page.caseId },
+      { $push: { additionals:  attachment} },
+      { new: true }
+    );
+    
+    sendReponse(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
+
+    
+    
 }
 
 
@@ -311,6 +348,6 @@ async function linkPage(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage};
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional};
 
 
