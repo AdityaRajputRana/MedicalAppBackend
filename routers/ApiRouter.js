@@ -5,6 +5,7 @@ import AuthorizationMW from '../middleware/authorizationMW.js';
 import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional } from '../controllers/PageCtrl.js';
 import { getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import multer from 'multer';
+import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
 
 const APIRouter = express.Router();
 APIRouter.use(AuthorizationMW);
@@ -12,6 +13,12 @@ APIRouter.use(AuthorizationMW);
 const upload = multer({ dest: 'uploads/' });
 
 APIRouter.post("/home", getHome);
+
+APIRouter.post("/guides/addVideo", addVideoGuide);
+APIRouter.post("/guides/setPosition", setGuidePosition);
+APIRouter.post("/guides/list", getGuidesList);
+
+
 APIRouter.post("/page/initialize", initialisePage);
 APIRouter.post("/page/addPoints", uploadPointsToPage);
 APIRouter.post("/page/addDetails", addDetails);
