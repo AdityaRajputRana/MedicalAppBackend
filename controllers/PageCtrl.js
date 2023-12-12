@@ -124,7 +124,7 @@ async function addAdditional(req, res) {
       { new: true }
     );
     
-    sendString(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
+    sendReponse(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
 
     
     
