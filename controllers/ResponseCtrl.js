@@ -8,6 +8,18 @@ export default  (success, message, data, res) => {
     return;
 }
 
+function sendString(success, message, data, res) {
+    let out = {
+        success, message, data
+    }
+
+    out = JSON.stringify(out);
+
+    res.status(200)
+        .send(out);
+    return;
+}
+
 function sendError(res, err, operation) {
     let message = err.message;
     if (operation) {
@@ -22,4 +34,4 @@ function sendError(res, err, operation) {
     return;
 }
 
-export { sendError };
+export { sendError, sendString };

@@ -3,7 +3,7 @@ import HospitalsPatient from "../models/HospitalsPatient.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
 import { uploadToPermanentStorage } from "../utils/FileUploader.js";
-import sendReponse, {sendError} from "./ResponseCtrl.js";
+import sendReponse, {sendError, sendString} from "./ResponseCtrl.js";
 import 'dotenv/config'
 
 async function initialisePage(req, res) {
@@ -124,7 +124,7 @@ async function addAdditional(req, res) {
       { new: true }
     );
     
-    sendReponse(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
+    sendString(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
 
     
     

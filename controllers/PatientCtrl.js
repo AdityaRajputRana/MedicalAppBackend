@@ -139,7 +139,7 @@ export const viewCase = async (req, res) => {
                 }
             ],
             doctor: mDoc,
-            additionals:[]
+            additionals:mCase.additionals
 
         }
 
