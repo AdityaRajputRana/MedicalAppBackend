@@ -1,5 +1,6 @@
 import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
+import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
 import { uploadToPermanentStorage } from "../utils/FileUploader.js";
@@ -118,7 +119,11 @@ async function addAdditional(req, res) {
     const attachment = {
         public_url: saveResult.publicUrl,
         metaData,
-        details: saveResult
+        details: {
+            name: "Doctor's Voice Attachment",
+            description: "Live Recording"
+        },
+        directory: saveResult
     }
 
     const page = await Page.findOne({ hospitalId: hospitalId, pageNumber: pageNumber });
@@ -134,6 +139,64 @@ async function addAdditional(req, res) {
 
     
     
+}
+
+/*linkGuide function will get the hospitalId and pageNumber and guideId from the request
+and append the CareGuide to additionals in the case associated with the page identified by hospitalId and pageNumber
+- use sendReponse function to send the response back to the client
+- use sendError function to send the error back to the client
+- additional uses same schema of attachement defined by public_url, metaData and details
+- we use mongoose and mongoDB to store the data
+*/
+async function linkGuide(req, res) {
+    const hospitalId = req.hospitalId;
+    const pageNumber = req.body.pageNumber;
+    const guideId = req.body.guideId;
+    const creatorId = req.uid;
+
+    if (!guideId)
+        return sendReponse(false, "Guide id is required in request", {}, res);
+    if (!pageNumber)
+        return sendReponse(false, "Page number is required in request", {}, res);
+    
+
+
+    const guide = await CareGuide.findOne({ _id: guideId })
+        .catch(err => sendError(res, err, "Finding guide"));
+    
+    if (!guide) {
+        sendReponse(false, "Guide not found", {}, res);
+        return;
+    }
+
+    const page = await Page.findOne({ hospitalId: hospitalId, pageNumber: pageNumber })
+        .catch(err => sendError(res, err, "Finding page"));
+    
+    if (!page) {
+        sendReponse(false, "Page not found, it may not have been initialised. Touch your page with your pen and wait for it to initialise first.", {}, res);
+        return;
+    }
+    
+    const caseId = page.caseId;
+
+    const additional = {
+        public_url: guide.url,
+        metaData: {
+            type: guide.type,
+            ext: guide.ext,
+            mime: guide.mime,
+            uploader: creatorId,
+            uploadedAt: Date.now()
+        },
+        details: {
+            name: guide.name,
+            description: guide.description,
+        }
+    }
+
+    const caseToUpdate = await Case.findOneAndUpdate({ _id: caseId }, { $push: { additionals: additional } }, { new: true })
+        .catch(err => sendError(res, err, "Updating case"));
+    sendReponse(true, "Guide linked successfully", { updatedCase: caseToUpdate }, res);
 }
 
 
@@ -354,6 +417,6 @@ async function linkPage(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional};
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide};
 
 
