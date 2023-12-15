@@ -149,7 +149,7 @@ async function viewCase(req, res) {
             doctor: mDoc,
             pages: pages,
             shareRequired: shareRequired,
-            additionals:[]
+            additionals:mCase.additionals
 
         }
 
