@@ -12,7 +12,12 @@ export async function uploadToPermanentStorage(file, path, metadata) {
     });
 
     const result = await cloudinary.uploader.upload(file, {
+            resource_type: "auto",
             folder: path
+    }).catch(err => {
+        console.log("Cloudinary err");
+        console.log(err);
+        throw err;
     });
 
     return {

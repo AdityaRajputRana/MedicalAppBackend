@@ -109,7 +109,11 @@ async function addAdditional(req, res) {
         uploader: req.uid,
         uploadedAt: Date.now()
     }
-    const saveResult = await uploadToPermanentStorage(req.file.path, filePath, metaData);
+
+    const saveResult = await uploadToPermanentStorage(req.file.path, filePath, metaData)
+        .catch(err => sendError(res, err, "Saving to cloudinary"));
+    console.log("Save res");
+    console.log(saveResult);
 
     const attachment = {
         public_url: saveResult.publicUrl,
@@ -123,8 +127,10 @@ async function addAdditional(req, res) {
       { $push: { additionals:  attachment} },
       { new: true }
     );
+
+    const responseData = { uploadedFile: attachment, updatedCase: caseToUpdate };
     
-    sendReponse(true, "File Uploaded Successfully", { uploadedFile: attachment, updatedCase: caseToUpdate }, res);
+    sendReponse(true, "File Uploaded Successfully", responseData, res);
 
     
     
