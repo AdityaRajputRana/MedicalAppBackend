@@ -1,6 +1,8 @@
 import { paginationLimit } from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
+import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
+import Hospital from "../models/hostpital.js";
 import Staff from "../models/staff.js";
 import sendReponse, { sendError } from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -81,4 +83,33 @@ export const viewPatient = async (req, res) => {
     sendReponse(true, "got it ", data, res);
 
     
+}
+
+// suggest another name for this function that matches its functionality
+export const getPageConfig = async (req, res) => {
+    const hospitalId = req.hospitalId;
+    const doctorId = req.uid;
+
+    const guides = await CareGuide.find({ doctorId: doctorId })
+        .sort({ position: 1 })
+        .catch(err => sendError(res, err, "Getting guides"));
+    
+    const hospitalDetails = await Hospital.findOne({ _id: hospitalId })
+        .catch(err => sendError(res, err, "Getting hospital details"));
+    
+    let pageDetails;
+    if (hospitalDetails) {
+        pageDetails = {
+            pageHeight: hospitalDetails.pageHeight,
+            pageWidth: hospitalDetails.pageWidth,
+            pageBackground: hospitalDetails.pageBackground,
+        }
+    }
+
+    let data = {
+        guides,
+        pageDetails
+    }
+
+    sendReponse(true, "got it ", data, res);
 }

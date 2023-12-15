@@ -3,6 +3,10 @@ import mongoose, { mongo } from "mongoose";
 const hospitalSchema = new mongoose.Schema({
     title: String,
     address: String,
+    pageBackground: String,
+    pageHeight: Number,
+    pageWidth: Number,
+    logo: String,
     departments: [
         String
     ]
