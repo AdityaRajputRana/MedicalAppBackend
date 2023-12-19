@@ -335,6 +335,7 @@ async function addMobileNumber(req, res) {
             patients: hospitalPatients
         }
 
+        await page.save().catch(err => sendError(res, err, "Saving page"));
         sendReponse(true, "Phone number linked and got related patients", data, res);
 
     } else {
