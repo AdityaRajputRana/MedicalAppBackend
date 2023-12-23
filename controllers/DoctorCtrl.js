@@ -10,12 +10,46 @@ import 'dotenv/config'
 
 export const getHome = async (req, res) => {
 
+    let hospitalId = req.hospitalId;
+    let staffId = req.uid;
+    let staffDetails = await Staff.findOne({ _id: staffId }, {fullName: 1, title: 1, hospital: 1}).catch(err=>sendError(res, err, "Getting staff details"));
+    let analytics = await getHospitalPatientAnalytics(hospitalId).catch(err => sendError(res, err, "Getting hospital patient analytics"));
     let data = {
-        naam: "Bhupendar Jogi",
-        americaMeKahaGhoomeHo: "Bohot jagah",
-        naamBatayiye: "Bhupendar Jogi"
+        staffDetails, analytics
+    };
+    sendReponse(true, "Home data fetched", data, res);
+}
+
+ /*This function returns analytics of patient of a hospital
+    * @param {String} hospitalId
+    * @return {Object} analytics
+Analytics will have data like total patients for today so far and in total,
+separated into M and F genders.
+Use HospitalPatient model to extract data.
+*/
+async function getHospitalPatientAnalytics(hospitalId) {
+    let totalPatients = await HospitalsPatient.find({ hospitalId: hospitalId }).countDocuments();
+    let totalMalePatients = await HospitalsPatient.find({ hospitalId: hospitalId, gender: "M" }).countDocuments();
+    let totalFemalePatients = await HospitalsPatient.find({ hospitalId: hospitalId, gender: "F" }).countDocuments();
+    
+    let patientsToday = await HospitalsPatient.find({ hospitalId: hospitalId, createdAt: { $gte: new Date().setHours(0, 0, 0, 0) } }).countDocuments();
+    let malePatientsToday = await HospitalsPatient.find({hospitalId: hospitalId, gender: "M", createdAt: { $gte: new Date().setHours(0, 0, 0, 0) } }).countDocuments();
+    let femalePatientsToday = await HospitalsPatient.find({ hospitalId: hospitalId, gender: "F", createdAt: { $gte: new Date().setHours(0, 0, 0, 0) } }).countDocuments();
+    
+    let analytics = {
+        total: {
+            count: totalPatients,
+            male: totalMalePatients,
+            female: totalFemalePatients
+        },
+        todaySoFar: {
+            count: patientsToday,
+            male: malePatientsToday,
+            female: femalePatientsToday
+        }
     }
-    sendReponse(true, "Home fetched", data, res);
+
+    return analytics;
 }
 
 export const getPatientHistory = async (req, res) => {
