@@ -345,6 +345,7 @@ async function addMobileNumber(req, res) {
 }
 
 async function linkPage(req, res) {
+    console.log("link page called");
     let hospitalPatientId = req.body.patientId;
     let hospitalId = req.hospitalId;
     let caseId = req.body.caseId;
@@ -382,9 +383,9 @@ async function linkPage(req, res) {
         page.caseId = caseId;
         page.hospitalPatientId = hospitalPatientId;
 
-            if (page.caseId != caseId) {
+            if (prevCaseId != caseId) {
                 if (page.caseId) {
-                    let oldCase = await Case.findOne({ _id: page.caseId })
+                    let oldCase = await Case.findOne({ _id:prevCaseId })
                         .catch(err => sendError(res, err, "Geting case document"));
                     
                     oldCase.pageCount -= 1;
@@ -398,7 +399,7 @@ async function linkPage(req, res) {
 
                 const newCase = await Case.findById(caseId);
                 if (newCase) {
-                    newCase.pageCount += 1;
+                    newCase.pageCount  += 1;
                     await newCase.save();
                 }
             }
