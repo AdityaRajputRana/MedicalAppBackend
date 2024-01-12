@@ -6,12 +6,12 @@ const staffSchema = new mongoose.Schema({
   lastName: String,
   mobileNumber: Number,
   email: String,
-  password: String, // This should be securely hashed
+  password: String,
   displayPicture: String,
   type: String,
   title: String,
   hospital: {
-    _id: String, // Todo: Set to Hospital ID soon
+    _id: String,
     name: String,
   },
 });

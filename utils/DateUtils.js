@@ -19,3 +19,8 @@ export const getFormattedDateTime = (timestamp) => {
     return `${date.toLocaleDateString('en-US')}, ${timeString}`;
   }
 }
+
+export const getCurrentDateAndTime = (timestamp) => {
+  //this function will return current date time in format - hh:mm am/pm, DAY, DD/MM/YYYY
+  
+}

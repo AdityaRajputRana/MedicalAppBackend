@@ -3,6 +3,7 @@ import HospitalsPatient from "../models/HospitalsPatient.js";
 import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
+import { getCurrentDateAndTime, getFormattedDateTime } from "../utils/DateUtils.js";
 import { uploadToPermanentStorage } from "../utils/FileUploader.js";
 import sendReponse, {sendError, sendString} from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -121,7 +122,7 @@ async function addAdditional(req, res) {
         metaData,
         details: {
             name: "Doctor's Voice Attachment",
-            description: "Live Recording"
+            description: "Recorded Live"
         },
         directory: saveResult
     }
