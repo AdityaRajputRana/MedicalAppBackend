@@ -30,7 +30,14 @@ const caseSchema = new mongoose.Schema({
   pdf: {
     publicUrl: String,
     updatedAt: Number
-  }
+  },
+  pdfTask: {
+    jobId: String,
+    status: String,
+    updatedAt: Number,
+    error: String,
+    message: String
+  },
 });
 
 const Case = mongoose.model('Case', caseSchema);

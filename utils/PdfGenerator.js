@@ -40,7 +40,6 @@ async function makePdf(pages, width, height, outputStream, background) {
                 if (!point) {
                     continue;
                 }
-                console.log(point);
                 point.x *= defaultScaleFactor;
                 point.y *= defaultScaleFactor;
 

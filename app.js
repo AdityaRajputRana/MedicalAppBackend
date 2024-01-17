@@ -5,12 +5,31 @@ import mongoose from 'mongoose';
 import Staff from './models/staff.js';
 import { APIRouter } from './routers/ApiRouter.js';
 import PatientRouter from './routers/PatientRouter.js';
+import { Queue } from 'bullmq';
+import { TaskQueueIds } from './config.js';
 
 
 
 const app = express();
 app.use(express.json());
 
+const defaultQueueOptions = {
+    defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+            type: 'exponential',
+            delay: 1000,
+        },
+        removeOnComplete: true,
+        removeOnFail: true,
+    }
+}
+const taskQueues = {
+    mainQueue: new Queue(TaskQueueIds.mainQueue, defaultQueueOptions)
+}
+
+
+export { taskQueues};
 app.get('/', (req, res) => {
     res.status(200)
         .send("Hello world. I am live!");

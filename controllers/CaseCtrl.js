@@ -3,9 +3,9 @@ import Page from "../models/page.js";
 import Staff from "../models/staff.js";
 import sendReponse, {sendError} from "./ResponseCtrl.js";
 import 'dotenv/config'
-import { paginationLimit } from "../config.js";
-import { makePdf } from "../utils/PdfGenerator.js";
+import { QueueJobNames, paginationLimit } from "../config.js";
 import { getFormattedDateTime } from "../utils/DateUtils.js";
+import { taskQueues } from "../app.js";
 
 async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
@@ -71,6 +71,28 @@ async function getCasesHistory(req, res) {
 }
 
 async function submitCase(req, res) {
+    const { caseId } = req.body;
+    const job = await taskQueues.mainQueue.add(QueueJobNames.generatePdf, { caseId: caseId });
+
+    console.log('Job added:', job.id);
+    await Case.updateOne({ _id: caseId }, {
+        $set: {
+            pdfTask: { jobId: job.id, status: "PENDING", updatedAt: Date.now() }
+        }
+    }).catch(err => sendError(res, err, "Updating Case"));
+
+    const queueLength = await taskQueues.mainQueue.count();
+    const expectedTime = queueLength * 3 + 10;
+    const response = {
+        jobId: job.id,
+        queueLength: queueLength,
+        expectedTime: expectedTime,
+    };
+
+    sendReponse(true, "Prescription is added to queue and will be shared with user once it is ready.", response, res);
+}
+
+async function generateCasePDF(req, res) {
     const { caseId } = req.body;
 
     const pages = await Page.find({ caseId })
