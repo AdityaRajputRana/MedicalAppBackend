@@ -6,6 +6,7 @@ import 'dotenv/config'
 import { QueueJobNames, paginationLimit } from "../config.js";
 import { getFormattedDateTime } from "../utils/DateUtils.js";
 import { taskQueues } from "../app.js";
+import { makePdf } from "../utils/PdfGenerator.js";
 
 async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
