@@ -181,7 +181,7 @@ async function viewCase(req, res) {
     }
 }
 
-export { mergeCases, getCasesHistory, submitCase, viewCase };
+export { mergeCases, getCasesHistory, submitCase, viewCase, generateCasePDF };
 
 
 

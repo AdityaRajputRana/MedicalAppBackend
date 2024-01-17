@@ -33,6 +33,7 @@ APIRouter.post("/page/additional/linkGuide", linkGuide);
 APIRouter.post("/case/merge", mergeCases); 
 APIRouter.post("/case/history", getCasesHistory);
 APIRouter.post("/case/submit", submitCase);
+APIRouter.post("/case/generatePDF", submitCase);
 APIRouter.post("/case/view", viewCase);
 
 APIRouter.post("/patients/list", getPatientHistory);
