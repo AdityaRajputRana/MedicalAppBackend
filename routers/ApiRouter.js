@@ -3,7 +3,7 @@ import { getHome, getPageConfig, getPatientHistory, viewPatient } from '../contr
 import '../controllers/PageCtrl.js'
 import AuthorizationMW from '../middleware/authorizationMW.js';
 import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide } from '../controllers/PageCtrl.js';
-import { getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
+import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import multer from 'multer';
 import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
 
@@ -33,7 +33,7 @@ APIRouter.post("/page/additional/linkGuide", linkGuide);
 APIRouter.post("/case/merge", mergeCases); 
 APIRouter.post("/case/history", getCasesHistory);
 APIRouter.post("/case/submit", submitCase);
-APIRouter.post("/case/generatePDF", submitCase);
+APIRouter.post("/case/generatePDF", generateCasePDF);
 APIRouter.post("/case/view", viewCase);
 
 APIRouter.post("/patients/list", getPatientHistory);
