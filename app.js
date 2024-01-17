@@ -5,8 +5,8 @@ import mongoose from 'mongoose';
 import Staff from './models/staff.js';
 import { APIRouter } from './routers/ApiRouter.js';
 import PatientRouter from './routers/PatientRouter.js';
-import { Queue } from 'bullmq';
-import { TaskQueueIds } from './config.js';
+import { Queue, RedisConnection } from 'bullmq';
+import { TaskQueueIds, redisConnection } from './config.js';
 
 
 
@@ -21,8 +21,9 @@ const defaultQueueOptions = {
             delay: 1000,
         },
         removeOnComplete: true,
-        removeOnFail: true,
-    }
+        removeOnFail: true
+    },
+    connection: redisConnection
 }
 const taskQueues = {
     mainQueue: new Queue(TaskQueueIds.mainQueue, defaultQueueOptions)

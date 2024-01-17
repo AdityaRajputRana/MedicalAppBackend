@@ -15,6 +15,7 @@ generatePdf: "GENERATE_PRESCRIPTION_PDF"
 }
 
 export const redisConnection = {
-    host: "red-cmk0iita73kc7388apq0",
-    port: 6379
+    host: "redis-19713.c212.ap-south-1-1.ec2.cloud.redislabs.com",
+    port: 19713,
+    password: "lyGBJRFvTj0V3UxWgd7jxOKb5xCBVKXj"
 }
