@@ -112,7 +112,7 @@ async function generateCasePDF(req, res) {
         }
     }).catch(err => sendError(res, err, "Updating Case"));
     
-    sendReponse(true, "Submit Request Sent", {
+    sendReponse(true, "Latest PDF Generated", {
         pdfUrl: url
     }, res);
 }
