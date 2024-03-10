@@ -12,7 +12,9 @@ async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
     const { hospitalId } = req;
     const updateResult = await Page.updateMany({ caseId: fromCaseId, hospitalId: hospitalId }, { $set: { caseId: toCaseId } })
-        .catch(err=>sendError(res, err, "Merging pages"));
+        .catch(err => sendError(res, err, "Merging pages"));
+    
+    let oldCase = await Case.findOne({ fromCaseId });
 
     const updatedCount = updateResult.modifiedCount;
 
@@ -21,7 +23,13 @@ async function mergeCases(req, res) {
             _id: toCaseId,
             hospitalId: hospitalId
         },
-      { $inc: { pageCount: updatedCount } }
+        {
+            $inc: { pageCount: updatedCount },
+            $push: {
+                pageNumbers: { $each: oldCase.pageNumbers },
+                additionals: {$each: oldCase.additionals}
+            }
+        }
     ).catch(err => sendError(res, err, "updating total pages (" + updatedCount + ")"));
     
     await Case.deleteOne({ _id: fromCaseId, hospitalId: hospitalId })
