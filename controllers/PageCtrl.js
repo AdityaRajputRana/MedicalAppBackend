@@ -9,7 +9,7 @@ import sendReponse, {sendError, sendString} from "./ResponseCtrl.js";
 import 'dotenv/config'
 
 
-async function getPagePoints(req, res) {
+async function getPage(req, res) {
     let hospitalId = req.hospitalId;
     let pageNumber = req.body.pageNumber;
     let width = defaultPageWidth;
@@ -443,6 +443,6 @@ async function linkPage(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPagePoints};
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPage};
 
 

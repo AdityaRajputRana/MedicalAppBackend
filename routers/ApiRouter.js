@@ -2,7 +2,7 @@ import express from 'express';
 import { getHome, getPageConfig, getPatientHistory, viewPatient } from '../controllers/DoctorCtrl.js';
 import '../controllers/PageCtrl.js'
 import AuthorizationMW from '../middleware/authorizationMW.js';
-import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPagePoints } from '../controllers/PageCtrl.js';
+import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPage } from '../controllers/PageCtrl.js';
 import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import multer from 'multer';
 import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
@@ -25,7 +25,7 @@ APIRouter.post("/page/addPoints", uploadPointsToPage);
 APIRouter.post("/page/addDetails", addDetails);
 APIRouter.post("/page/changeCase", changeCase); //Todo
 APIRouter.post("/page/addMobileNumber", addMobileNumber);
-APIRouter.post("/page/getPoints", getPagePoints);
+APIRouter.post("/page/getPoints", getPage);
 APIRouter.post("/page/link", linkPage);
 APIRouter.post("/page/additional/upload", upload.single('file'), addAdditional);
 APIRouter.post("/page/additional/linkGuide", linkGuide);
