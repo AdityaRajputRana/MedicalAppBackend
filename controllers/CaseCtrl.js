@@ -14,7 +14,7 @@ async function mergeCases(req, res) {
     const updateResult = await Page.updateMany({ caseId: fromCaseId, hospitalId: hospitalId }, { $set: { caseId: toCaseId } })
         .catch(err => sendError(res, err, "Merging pages"));
     
-    let oldCase = await Case.findOne({ caseId: fromCaseId });
+    let oldCase = await Case.findOne({ _id: fromCaseId });
     if (!oldCase) {
         oldCase = { pageNumbers: [], additionals: [] }
     }
@@ -30,7 +30,11 @@ async function mergeCases(req, res) {
         {
             $inc: { pageCount: updatedCount },
             $push: {
-                pageNumbers: { $each: (oldCase.pageNumbers)?oldCase.pageNumbers:[] },
+                pageNumbers: {
+                    $each: (oldCase.pageNumbers) ? oldCase.pageNumbers : [],
+                },
+            },
+            $push: {
                 additionals: {$each: (oldCase.additionals)?oldCase.additionals:[]}
             }
         }
