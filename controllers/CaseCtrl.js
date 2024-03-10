@@ -167,7 +167,7 @@ async function viewCase(req, res) {
             patient: patient,
             documents,
             doctor: mDoc,
-            pages: pages,
+            pageNumbers: mCase.pageNumbers,
             shareRequired: shareRequired,
             additionals:mCase.additionals
 
