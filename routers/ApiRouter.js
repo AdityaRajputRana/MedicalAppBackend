@@ -25,7 +25,7 @@ APIRouter.post("/page/addPoints", uploadPointsToPage);
 APIRouter.post("/page/addDetails", addDetails);
 APIRouter.post("/page/changeCase", changeCase); //Todo
 APIRouter.post("/page/addMobileNumber", addMobileNumber);
-APIRouter.post("/page/getPoints", getPage);
+APIRouter.post("/page/view", getPage);
 APIRouter.post("/page/link", linkPage);
 APIRouter.post("/page/additional/upload", upload.single('file'), addAdditional);
 APIRouter.post("/page/additional/linkGuide", linkGuide);
