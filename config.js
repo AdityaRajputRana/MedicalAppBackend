@@ -3,7 +3,7 @@ export const defaultPageType = "DEFAULT";
 
 export const defaultPageHeight = 150;
 export const defaultPageWidth = 70;
-export const defaultScaleFactor = 8.5;
+export const defaultScaleFactor = 0.2;
 
 export const paginationLimit = 15;
 export const TaskQueueIds = {

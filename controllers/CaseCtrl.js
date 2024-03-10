@@ -128,9 +128,6 @@ async function viewCase(req, res) {
     let doctor = await Staff.findOne({ _id: mCase.doctorId })
         .catch(err => sendError(res, err, "Finding doctor"));
     
-    let pages = await Page.find({ caseId: caseId })
-        .catch(err => sendError(res, err, "Getting Pages"));
-    
     let documents = [];
     let shareRequired = true;
 

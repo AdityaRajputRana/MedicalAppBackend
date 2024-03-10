@@ -8,6 +8,20 @@ import { uploadToPermanentStorage } from "../utils/FileUploader.js";
 import sendReponse, {sendError, sendString} from "./ResponseCtrl.js";
 import 'dotenv/config'
 
+
+async function getPagePoints(req, res) {
+    let hospitalId = req.hospitalId;
+    let pageNumber = req.body.pageNumber;
+    let width = defaultPageWidth;
+    let height = defaultPageHeight;
+
+    let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId });
+    if (page) {
+        sendReponse(true, "", page, res);
+    }
+    sendReponse(false, "Page Does not exist", null, res);
+}
+
 async function initialisePage(req, res) {
     let hospitalId = req.hospitalId;
     let pageNumber = req.body.pageNumber;
@@ -40,6 +54,7 @@ async function initialisePage(req, res) {
             creatorId: req.uid,
             doctorId: req.uid, //Todo: This should be updated after adding associates
             pageCount: 1,
+            pageNumbers: [pageNumber],
             createdAt: Date.now(),
             updatedAt: Date.now()
         });
@@ -70,6 +85,8 @@ async function initialisePage(req, res) {
 }
 
 async function uploadPointsToPage(req, res) {
+    //calculate total time to process this request
+    let startTime = Date.now();
     let pageNumber = req.body.pageNumber;
     let hospitalId = req.hospitalId;
     let pointsToAdd = req.body.pointsToAdd;
@@ -135,6 +152,8 @@ async function addAdditional(req, res) {
     );
 
     const responseData = { uploadedFile: attachment, updatedCase: caseToUpdate };
+    let endTime = Date.now();
+    console.log("Total time to process request: " + (endTime - startTime) + "ms");
     
     sendReponse(true, "File Uploaded Successfully", responseData, res);
 
@@ -233,6 +252,7 @@ async function addDetails(req, res) {
                 hospitalId: hospitalId,
                 creatorId: req.body.uid,
                 pageCount: 1,
+                pageNumbers: [pageNumber],
                 createdAt: Date.now(),
                 updatedAt: Date.now()
             });
@@ -369,6 +389,7 @@ async function linkPage(req, res) {
             updatedAt: Date.now(),
             fullName: patient.fullName,
             gender: patient.gender,
+            pageNumbers:[],
             doctorId: req.uid,
             creatorId: req.uid,
             pageCount: 0,
@@ -390,6 +411,7 @@ async function linkPage(req, res) {
                         .catch(err => sendError(res, err, "Geting case document"));
                     
                     oldCase.pageCount -= 1;
+                    oldCase.pageNumbers = oldCase.pageNumbers.filter(pn => pn != pageNumber);
                     if (oldCase.pageCount <= 0) {
                         await Case.findByIdAndDelete(prevCaseId); 
                     } else {
@@ -400,7 +422,8 @@ async function linkPage(req, res) {
 
                 const newCase = await Case.findById(caseId);
                 if (newCase) {
-                    newCase.pageCount  += 1;
+                    newCase.pageCount += 1;
+                    newCase.pageNumbers.push(pageNumber);
                     await newCase.save();
                 }
             }
@@ -420,6 +443,6 @@ async function linkPage(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide};
+export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPagePoints};
 
 

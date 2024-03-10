@@ -25,6 +25,8 @@ const caseSchema = new mongoose.Schema({
   createdAt: Number,
   updatedAt: Number,
 
+  pageNumbers: [Number],
+
   additionals:[],
 
   pdf: {
