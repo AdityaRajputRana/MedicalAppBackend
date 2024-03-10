@@ -15,9 +15,11 @@ async function getPage(req, res) {
     let width = defaultPageWidth;
     let height = defaultPageHeight;
 
+
     let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId });
     if (page) {
         sendReponse(true, "", page, res);
+        return;
     }
     sendReponse(false, "Page Does not exist", null, res);
 }
