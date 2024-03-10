@@ -154,8 +154,6 @@ async function addAdditional(req, res) {
     );
 
     const responseData = { uploadedFile: attachment, updatedCase: caseToUpdate };
-    let endTime = Date.now();
-    console.log("Total time to process request: " + (endTime - startTime) + "ms");
     
     sendReponse(true, "File Uploaded Successfully", responseData, res);
 
