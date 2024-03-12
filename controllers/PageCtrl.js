@@ -128,6 +128,7 @@ async function addAdditional(req, res) {
         ext: data.metaData.ext,
         mime: data.metaData.mime,
         fileName: data.metaData.fileName || "",
+        description: data.metaData.description || "",
         uploader: req.uid,
         uploadedAt: Date.now()
     }
@@ -142,7 +143,7 @@ async function addAdditional(req, res) {
         metaData,
         details: {
             name: data.metaData.fileName || "Doctor's Voice Attachment",
-            description: "Recorded Live"
+            description: data.metaData.description || "Recorded Live"
         },
         directory: saveResult
     }
