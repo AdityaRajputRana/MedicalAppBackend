@@ -1,3 +1,4 @@
+import { type } from "express/lib/response";
 import mongoose from "mongoose";
 
 const guideSchema = new mongoose.Schema({
@@ -5,7 +6,10 @@ const guideSchema = new mongoose.Schema({
     hospitalId: String,
     doctorId: String,
     description: String,
-    position: Number,
+    position: {
+        type: Number,
+        default: 100
+    },
     url: String,
     type: String,
     mime: String,

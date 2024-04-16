@@ -41,9 +41,10 @@ const setGuidePosition = async(req, res) => {
         }
     })
         .catch(err => sendError(res, err, "Adding Position to new guide"));
-    
-    promotedGuide.position = position;
-    demotedGuide.position = 100;
+    if (promotedGuide)
+        promotedGuide.position = position;
+    if (demotedGuide)
+        demotedGuide.position = 100;
     
     sendResponse(true, "Position updated", {promotedGuide, demotedGuide}, res);
 
