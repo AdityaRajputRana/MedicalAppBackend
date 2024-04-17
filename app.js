@@ -7,6 +7,7 @@ import { APIRouter } from './routers/ApiRouter.js';
 import PatientRouter from './routers/PatientRouter.js';
 import { Queue, RedisConnection } from 'bullmq';
 import { TaskQueueIds, redisConnection } from './config.js';
+import HospitalsPatient from './models/HospitalsPatient.js';
 
 
 
@@ -48,8 +49,9 @@ const db = mongoose.connection;
 db.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
-db.once('open', () => {
+db.once('open', async() => {
     console.log('Connected to MongoDB');
+    HospitalsPatient.collection.createIndex({ searchIndex: "text" });
 });
 
 

@@ -54,33 +54,45 @@ async function getHospitalPatientAnalytics(hospitalId) {
 
 export const getPatientHistory = async (req, res) => {
     let hospitalId = req.hospitalId;
-    let { doctorId, creatorId, pageNumber } = req.body;
+    let { doctorId, creatorId, pageNumber, searchQuery } = req.body;
     if (!pageNumber) {
         pageNumber = 0;
     }
     pageNumber = Math.max(1, pageNumber);
 
-    const query = HospitalsPatient.find({});
+    let query = {};
+
+    if (searchQuery) {
+        query.$text = {$search: searchQuery};
+    }
+
+    let conditions = [];
+
     if (hospitalId) {
-        query.where('hospitalId').equals(hospitalId);
+        conditions.push({hospitalId: hospitalId});
     }
 
     if (doctorId) {
-        query.where('doctorId').equals(doctorId);
+        conditions.push({doctorId: doctorId});
     }
 
     if (creatorId) {
-        query.where('creatorId').equals(creatorId);
+        conditions.push({creatorId: creatorId});
     }
 
-    const countQuery = query.model.find(query._conditions);
-    const totalCount = await countQuery.countDocuments().catch(err=>sendError(res, err,  "Counting documents"));
+    if (conditions.length > 0) {
+        query.$and = conditions;
+    }
 
-    query.sort({ updatedAt: -1 });
-    query.skip((pageNumber - 1) * paginationLimit);
-    query.limit(paginationLimit);
+    let countQuery = HospitalsPatient.countDocuments(query);
+    let totalCount = await countQuery.catch(err => sendError(res, err, "Counting documents"));
 
-    const patients = await query.exec().catch(err=>sendError(res, err, "Fetching cases"));
+    const patients = await HospitalsPatient.find(query)
+        .sort({ updatedAt: -1 })
+        .skip((pageNumber - 1) * paginationLimit)
+        .limit(paginationLimit)
+        .catch(err => sendError(res, err, "Fetching cases"));
+
     const totalPages = Math.ceil(totalCount / paginationLimit);
 
     let data = {
@@ -91,8 +103,8 @@ export const getPatientHistory = async (req, res) => {
 
     sendReponse(true, "Patient history fetched", data, res);
     return;
-
 }
+
 
 export const viewPatient = async (req, res) => {
     const hospitalId = req.hospitalId;
