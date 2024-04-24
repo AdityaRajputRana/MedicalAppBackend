@@ -116,6 +116,7 @@ export const viewPatient = async (req, res) => {
     
     if (!patientDetails) {
         sendReponse(false, "Patient is not found on hostpital's record", {}, res);
+        return;
     }
 
     const patientCases = await Case.find({ hospitalPatientId: patientId })
