@@ -160,3 +160,30 @@ export const getPageConfig = async (req, res) => {
 
     sendReponse(true, "got it ", data, res);
 }
+
+//Function to add a new patient to HospitalPatient collection with details fullName, mobileNumber, age, gender, doctorId, creatorId, hospitalId
+export const addNewPatient = async (req, res) => {
+    let hospitalId = req.hospitalId;
+    let creatorId = req.uid;
+    let { fullName, mobileNumber, age, gender } = req.body;
+    let createdAt = Date.now();
+    let updatedAt = Date.now();
+
+    let patient = new HospitalsPatient({
+        fullName,
+        mobileNumber,
+        age,
+        gender,
+        creatorId,
+        hospitalId,
+        createdAt,
+        updatedAt
+    });
+
+    let newPatient = await patient.save().catch(err => sendError(res, err, "Adding patient"));
+    let viewPatientResponse = {
+        patientDetails: newPatient,
+        patientCases: []
+    }
+    sendReponse(true, "Patient Added", viewPatientResponse, res);
+}
