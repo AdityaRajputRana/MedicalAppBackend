@@ -432,8 +432,10 @@ async function linkPage(req, res) {
         
         await page.save()
             .catch(err => sendError(res, err, "Saving page"));
+
+        let hospitalPatient = await HospitalsPatient.findOne({ _id: hospitalPatientId });
         
-        sendReponse(true, "patient linked", {}, res);
+        sendReponse(true, "patient linked", {patient: hospitalPatient}, res);
     } else {
         sendReponse(false, "Page not found", {}, res);
     }
