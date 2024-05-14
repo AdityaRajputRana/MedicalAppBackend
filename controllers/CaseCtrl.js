@@ -51,7 +51,7 @@ async function mergeCases(req, res) {
 
 async function getCasesHistory(req, res) {
     let hospitalId = req.hospitalId;
-    let { doctorId, creatorId, pageNumber } = req.body;
+    let { doctorId, creatorId, pageNumber, patientId } = req.body;
     pageNumber = Math.max(1, pageNumber);
 
 
@@ -62,6 +62,10 @@ async function getCasesHistory(req, res) {
 
     if (doctorId) {
         query.where('doctorId').equals(doctorId);
+    }
+
+    if (patientId){
+        query.where('hospitalPatientId').equals(patientId);
     }
 
     if (creatorId) {
