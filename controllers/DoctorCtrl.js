@@ -3,6 +3,7 @@ import HospitalsPatient from "../models/HospitalsPatient.js";
 import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
 import Hospital from "../models/hostpital.js";
+import PageConfigMeta from "../models/pageConfigMeta.js";
 import Staff from "../models/staff.js";
 import sendReponse, { sendError } from "./ResponseCtrl.js";
 import 'dotenv/config'
@@ -159,6 +160,20 @@ export const getPageConfig = async (req, res) => {
     }
 
     sendReponse(true, "got it ", data, res);
+}
+
+export const getPageConfigMetadata = async (req, res) => {
+    const hospitalId = req.hospitalId;
+    const doctorId = req.uid;
+
+    const pageConfigMeta = await PageConfigMeta.findOne({ hospitalId, doctorId })
+    .catch(err => sendError(res, err, "Getting Page Metadata Details"));
+
+    if (pageConfigMeta){
+        sendReponse(true, "Got Page Metadata", pageConfigMeta, res);
+        return;
+    }
+    sendReponse(false, "Configuration Data is not available for the given doctor. Please Contact Administrator")
 }
 
 //Function to add a new patient to HospitalPatient collection with details fullName, mobileNumber, age, gender, doctorId, creatorId, hospitalId
