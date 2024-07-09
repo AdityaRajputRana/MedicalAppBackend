@@ -173,7 +173,31 @@ export const getPageConfigMetadata = async (req, res) => {
         sendReponse(true, "Got Page Metadata", pageConfigMeta, res);
         return;
     }
-    sendReponse(false, "Configuration Data is not available for the given doctor. Please Contact Administrator")
+    sendReponse(false, "Configuration Data is not available for the given doctor. Please Contact Administrator", null, res)
+}
+
+export const updatePageConfigMetadata = async (req, res) => {
+    const hospitalId = req.hospitalId;
+    const doctorId = req.uid;
+
+    const configUrl = req.body.configUrl;
+
+    let configMetaData = await PageConfigMeta.findOne(
+        { hospitalId, doctorId }
+    ).catch(err => sendError(res, err, "Finding Page Metadata Details"));
+
+    if (!configMetaData){
+        configMetaData = new PageConfigMeta({
+            doctorId,
+            hospitalId,
+            configUrl
+        });
+    } else {
+        configMetaData.configUrl = configUrl;
+        configMetaData.__v = configMetaData.__v + 1;
+    }
+    await configMetaData.save();
+    sendReponse(true, "Config Updated Successfully", configMetaData, res);
 }
 
 //Function to add a new patient to HospitalPatient collection with details fullName, mobileNumber, age, gender, doctorId, creatorId, hospitalId

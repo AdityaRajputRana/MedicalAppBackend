@@ -8,9 +8,8 @@ const PageConfigMetaSchema = new mongoose.Schema({
     timestamps:true
 });
 
-PageConfigMetaSchema.pre('update', function( next ) {
-    this.update({}, { $inc: { __v: 1 } }, next );
-});
+
+PageConfigMetaSchema.index({ hospitalId: 1, doctorId: 1}, { unique: true });
 
 const PageConfigMeta = mongoose.model("PageConfigMetadata", PageConfigMetaSchema);
 export default PageConfigMeta;

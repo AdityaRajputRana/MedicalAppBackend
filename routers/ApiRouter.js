@@ -1,5 +1,5 @@
 import express from 'express';
-import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, viewPatient } from '../controllers/DoctorCtrl.js';
+import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, updatePageConfigMetadata, viewPatient } from '../controllers/DoctorCtrl.js';
 import '../controllers/PageCtrl.js'
 import AuthorizationMW from '../middleware/authorizationMW.js';
 import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPage } from '../controllers/PageCtrl.js';
@@ -15,6 +15,7 @@ const upload = multer({ dest: 'uploads/' });
 APIRouter.post("/home", getHome);
 APIRouter.post("/doctor/getPageConfig", getPageConfig);
 APIRouter.post("/doctor/getPageConfigMetadata", getPageConfigMetadata)
+APIRouter.post("/doctor/updatePageConfigMetadata", updatePageConfigMetadata)
 
 APIRouter.post("/guides/addVideo", addVideoGuide);
 APIRouter.post("/guides/setPosition", setGuidePosition);
