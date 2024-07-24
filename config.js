@@ -1,3 +1,6 @@
+import 'dotenv/config';
+import { WebSocketServer } from 'ws';
+
 export const saltRounds = 10;
 export const defaultPageType = "DEFAULT";
 
@@ -19,3 +22,28 @@ export const redisConnection = {
     port: 19713,
     password: "lyGBJRFvTj0V3UxWgd7jxOKb5xCBVKXj"
 }
+
+export const WSServer = (server) => {
+    console.log("Server Ki value",server);
+    const wss = new WebSocketServer({port:9090});
+  
+    wss.on('connection', (ws) => {
+        console.log('Client connected');
+
+    
+    //WEB SOCKET MESSAGE EVENT
+
+    
+      ws.on('message', (message) => {
+        console.log('Received message:', message.toString());
+        // Process message here
+        ws.send(`You sent: ${message}`);
+      });
+
+
+  
+      ws.on('close', () => {
+        console.log('Client disconnected');
+      });
+    });
+  }
