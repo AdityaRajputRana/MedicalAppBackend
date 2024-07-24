@@ -1,9 +1,9 @@
+import bcrypt from 'bcrypt';
+import 'dotenv/config';
+import jwt from "jsonwebtoken";
 import { saltRounds } from "../config.js";
 import Staff from "../models/staff.js";
 import sendReponse from "./ResponseCtrl.js";
-import bcrypt from 'bcrypt';
-import 'dotenv/config'
-import jwt from "jsonwebtoken";
 
 async function generateJWT(staff) {
     let data = {

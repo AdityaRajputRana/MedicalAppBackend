@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { paginationLimit } from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
 import CareGuide from "../models/careGuide.js";
@@ -6,7 +7,6 @@ import Hospital from "../models/hostpital.js";
 import PageConfigMeta from "../models/pageConfigMeta.js";
 import Staff from "../models/staff.js";
 import sendReponse, { sendError } from "./ResponseCtrl.js";
-import 'dotenv/config'
 
 
 export const getHome = async (req, res) => {

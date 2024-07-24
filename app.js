@@ -1,13 +1,12 @@
+import { Queue } from 'bullmq';
+import 'dotenv/config';
 import express from 'express';
-import 'dotenv/config'
-import { AuthRouter } from './routers/AuthRouter.js';
-import mongoose from 'mongoose';
-import Staff from './models/staff.js';
-import { APIRouter } from './routers/ApiRouter.js';
-import PatientRouter from './routers/PatientRouter.js';
-import { Queue, RedisConnection } from 'bullmq';
+import mongoose from 'mongoose';    
 import { TaskQueueIds, redisConnection } from './config.js';
 import HospitalsPatient from './models/HospitalsPatient.js';
+import { APIRouter } from './routers/ApiRouter.js';
+import { AuthRouter } from './routers/AuthRouter.js';
+import PatientRouter from './routers/PatientRouter.js';
 
 
 
@@ -31,7 +30,7 @@ const taskQueues = {
 }
 
 
-export { taskQueues};
+export { taskQueues };
 app.get('/', (req, res) => {
     res.status(200)
         .send("Hello world. I am live!");

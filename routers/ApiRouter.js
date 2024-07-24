@@ -1,11 +1,11 @@
 import express from 'express';
-import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, updatePageConfigMetadata, viewPatient } from '../controllers/DoctorCtrl.js';
-import '../controllers/PageCtrl.js'
-import AuthorizationMW from '../middleware/authorizationMW.js';
-import { addDetails, initialisePage, uploadPointsToPage, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPage } from '../controllers/PageCtrl.js';
-import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import multer from 'multer';
+import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
+import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, updatePageConfigMetadata, viewPatient } from '../controllers/DoctorCtrl.js';
 import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
+import '../controllers/PageCtrl.js';
+import { addAdditional, addDetails, addMobileNumber, changeCase, getPage, initialisePage, linkGuide, linkPage, uploadPointsToPage } from '../controllers/PageCtrl.js';
+import AuthorizationMW from '../middleware/authorizationMW.js';
 
 const APIRouter = express.Router();
 APIRouter.use(AuthorizationMW);

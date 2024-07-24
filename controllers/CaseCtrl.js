@@ -1,12 +1,12 @@
-import Case from "../models/case.js"
+import 'dotenv/config';
+import { taskQueues } from "../app.js";
+import { QueueJobNames, paginationLimit } from "../config.js";
+import Case from "../models/case.js";
 import Page from "../models/page.js";
 import Staff from "../models/staff.js";
-import sendReponse, {sendError} from "./ResponseCtrl.js";
-import 'dotenv/config'
-import { QueueJobNames, paginationLimit } from "../config.js";
 import { getFormattedDateTime } from "../utils/DateUtils.js";
-import { taskQueues } from "../app.js";
 import { makePdf } from "../utils/PdfGenerator.js";
+import sendReponse, { sendError } from "./ResponseCtrl.js";
 
 async function mergeCases(req, res) {
     const { fromCaseId, toCaseId } = req.body;
@@ -201,7 +201,7 @@ async function viewCase(req, res) {
     }
 }
 
-export { mergeCases, getCasesHistory, submitCase, viewCase, generateCasePDF };
+export { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase };
 
 
 

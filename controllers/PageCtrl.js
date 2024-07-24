@@ -1,12 +1,11 @@
+import 'dotenv/config';
 import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
 import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
-import { getCurrentDateAndTime, getFormattedDateTime } from "../utils/DateUtils.js";
 import { uploadToPermanentStorage } from "../utils/FileUploader.js";
-import sendReponse, {sendError, sendString} from "./ResponseCtrl.js";
-import 'dotenv/config'
+import sendReponse, { sendError } from "./ResponseCtrl.js";
 
 
 async function getPage(req, res) {
@@ -447,6 +446,6 @@ async function linkPage(req, res) {
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { initialisePage, uploadPointsToPage, addDetails, changeCase, addMobileNumber, linkPage, addAdditional, linkGuide, getPage};
+export { addAdditional, addDetails, addMobileNumber, changeCase, getPage, initialisePage, linkGuide, linkPage, uploadPointsToPage };
 
 

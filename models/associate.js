@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const associateSchema = new mongoose.Schema({
     name: String,
