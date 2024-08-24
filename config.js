@@ -24,14 +24,10 @@ export const redisConnection = {
 }
 
 export const WSServer = (server) => {
-    console.log("Server Ki value",server);
     const wss = new WebSocketServer({port:9090});
   
     wss.on('connection', (ws) => {
         console.log('Client connected');
-
-    
-    //WEB SOCKET MESSAGE EVENT
 
     
       ws.on('message', (message) => {
