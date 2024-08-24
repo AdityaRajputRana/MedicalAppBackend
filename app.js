@@ -16,7 +16,7 @@ app.use(express.json());
 
 
 const server = http.createServer(app);
-WSServer();
+WSServer(server);
 
 
 

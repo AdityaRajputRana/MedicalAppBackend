@@ -23,15 +23,10 @@ export const redisConnection = {
     password: "lyGBJRFvTj0V3UxWgd7jxOKb5xCBVKXj"
 }
 
-export const WSServer = () => {
-    const port = process.env.WEBSOCKET_PORT || 4123;
-    const wss = new WebSocketServer({port: port});
-    console.log("Socket Ka Port", port);
-  
+export const WSServer = (server) => {
+    const wss = new WebSocketServer({server:server});
     wss.on('connection', (ws) => {
         console.log('Client connected');
-
-    
       ws.on('message', (message) => {
         console.log('Received message:', message.toString());
         // Process message here
