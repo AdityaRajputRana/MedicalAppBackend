@@ -24,8 +24,9 @@ export const redisConnection = {
 }
 
 export const WSServer = () => {
-  const port = 10001;
+    const port = process.env.WEBSOCKET_PORT || 4123;
     const wss = new WebSocketServer({port: port});
+    console.log("Socket Ka Port", port);
   
     wss.on('connection', (ws) => {
         console.log('Client connected');
