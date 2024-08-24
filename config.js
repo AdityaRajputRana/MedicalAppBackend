@@ -23,7 +23,7 @@ export const redisConnection = {
     password: "lyGBJRFvTj0V3UxWgd7jxOKb5xCBVKXj"
 }
 
-export const WSServer = (server) => {
+export const WSServer = () => {
     const wss = new WebSocketServer({port: 10000});
   
     wss.on('connection', (ws) => {
