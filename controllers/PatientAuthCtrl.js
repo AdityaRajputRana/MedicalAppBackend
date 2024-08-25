@@ -1,7 +1,7 @@
+import 'dotenv/config';
+import jwt from "jsonwebtoken";
 import Patient from "../models/patient.js";
 import sendResponse, { sendError } from "./ResponseCtrl.js";
-import 'dotenv/config'
-import jwt from "jsonwebtoken";
 
 async function generateJWT(staff) {
     let data = {

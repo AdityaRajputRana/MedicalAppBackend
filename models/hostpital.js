@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const hospitalSchema = new mongoose.Schema({
     title: String,

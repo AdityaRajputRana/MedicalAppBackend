@@ -1,7 +1,7 @@
 import express from "express";
-import PatientAuthRouter from "./PatientAuthRouter.js";
-import patientAuthorizationMW from "../middleware/PatientAuthorizationMW.js";
 import { editPatientProfile, getPatientHome, getPatientPrescriptions, viewCase } from "../controllers/PatientCtrl.js";
+import patientAuthorizationMW from "../middleware/PatientAuthorizationMW.js";
+import PatientAuthRouter from "./PatientAuthRouter.js";
 
 const Router = express.Router();
 

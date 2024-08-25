@@ -1,18 +1,26 @@
+import { Queue } from 'bullmq';
+import 'dotenv/config';
 import express from 'express';
-import 'dotenv/config'
-import { AuthRouter } from './routers/AuthRouter.js';
+import http from 'http';
 import mongoose from 'mongoose';
-import Staff from './models/staff.js';
-import { APIRouter } from './routers/ApiRouter.js';
-import PatientRouter from './routers/PatientRouter.js';
-import { Queue, RedisConnection } from 'bullmq';
-import { TaskQueueIds, redisConnection } from './config.js';
+import { TaskQueueIds, redisConnection, setupSocket } from './config.js';
 import HospitalsPatient from './models/HospitalsPatient.js';
+import { APIRouter } from './routers/ApiRouter.js';
+import { AuthRouter } from './routers/AuthRouter.js';
+import PatientRouter from './routers/PatientRouter.js';
 
 
 
 const app = express();
 app.use(express.json());
+
+
+const server = http.createServer(app);
+// WSServer(server);
+
+setupSocket(server);
+
+
 
 const defaultQueueOptions = {
     defaultJobOptions: {
@@ -31,7 +39,7 @@ const taskQueues = {
 }
 
 
-export { taskQueues};
+export { taskQueues };
 app.get('/', (req, res) => {
     res.status(200)
         .send("Hello world. I am live!");
@@ -55,7 +63,6 @@ db.once('open', async() => {
 });
 
 
-
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log(`Server started at http://localhost:${process.env.PORT}`)
 })

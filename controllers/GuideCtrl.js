@@ -67,4 +67,4 @@ const getGuidesList = async (req, res) => {
     sendResponse(true, "Got all guides", data, res);
 }
 
-export {addVideoGuide, setGuidePosition, getGuidesList}
+export { addVideoGuide, getGuidesList, setGuidePosition };

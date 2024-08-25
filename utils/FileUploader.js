@@ -1,5 +1,4 @@
 import cd from 'cloudinary';
-import PDFDocument from 'pdfkit';
 
 
 

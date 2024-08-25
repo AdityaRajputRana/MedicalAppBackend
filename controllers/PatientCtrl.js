@@ -1,10 +1,10 @@
-import Patient from "../models/patient.js";
-import Case from "../models/case.js";
-import sendReponse, { sendError } from "./ResponseCtrl.js";
-import 'dotenv/config'
+import 'dotenv/config';
 import { paginationLimit } from "../config.js";
-import { getFormattedDateTime } from "../utils/DateUtils.js";
+import Case from "../models/case.js";
+import Patient from "../models/patient.js";
 import Staff from "../models/staff.js";
+import { getFormattedDateTime } from "../utils/DateUtils.js";
+import sendReponse, { sendError } from "./ResponseCtrl.js";
 
 
 export const editPatientProfile = async (req, res) => {
