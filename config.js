@@ -56,7 +56,6 @@ export function setupSocket(server) {
       console.log("Received message:", data);
 
       // Echo the message back to the client
-      socket.emit("message", data);
       socket.broadcast.emit("message", data);
     });
 
