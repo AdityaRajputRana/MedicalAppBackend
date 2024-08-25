@@ -57,6 +57,7 @@ export function setupSocket(server) {
 
       // Echo the message back to the client
       socket.emit("message", data);
+      socket.broadcast.emit("message", data);
     });
 
     //Disconnect the socket
