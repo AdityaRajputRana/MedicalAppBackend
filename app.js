@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
-import { TaskQueueIds, WSServer, redisConnection } from './config.js';
+import { TaskQueueIds, redisConnection, setupSocket } from './config.js';
 import HospitalsPatient from './models/HospitalsPatient.js';
 import { APIRouter } from './routers/ApiRouter.js';
 import { AuthRouter } from './routers/AuthRouter.js';
@@ -16,7 +16,9 @@ app.use(express.json());
 
 
 const server = http.createServer(app);
-WSServer(server);
+// WSServer(server);
+
+setupSocket(server);
 
 
 
@@ -61,7 +63,6 @@ db.once('open', async() => {
 });
 
 
-
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log(`Server started at http://localhost:${process.env.PORT}`)
 })
