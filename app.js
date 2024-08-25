@@ -42,7 +42,7 @@ const taskQueues = {
 export { taskQueues };
 app.get('/', (req, res) => {
     res.status(200)
-        .send("Hello world. I am live!");
+        .send("Hello New world. I am live!");
 })
 
 app.use('/auth', AuthRouter);
