@@ -6,6 +6,7 @@ import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/G
 import '../controllers/PageCtrl.js';
 import { addAdditional, addDetails, addMobileNumber, changeCase, getPage, initialisePage, linkGuide, linkPage, uploadPointsToPage } from '../controllers/PageCtrl.js';
 import AuthorizationMW from '../middleware/authorizationMW.js';
+import { createAppointment, deleteAppointment, editAppointment } from '../controllers/ApptCtrl.js';
 
 const APIRouter = express.Router();
 APIRouter.use(AuthorizationMW);
@@ -20,6 +21,11 @@ APIRouter.post("/doctor/updatePageConfigMetadata", updatePageConfigMetadata)
 APIRouter.post("/guides/addVideo", addVideoGuide);
 APIRouter.post("/guides/setPosition", setGuidePosition);
 APIRouter.post("/guides/list", getGuidesList);
+
+
+APIRouter.post('/appointments', createAppointment);
+APIRouter.put('/appointments', editAppointment);
+APIRouter.delete('/appointments', deleteAppointment);
 
 
 APIRouter.post("/page/initialize", initialisePage);

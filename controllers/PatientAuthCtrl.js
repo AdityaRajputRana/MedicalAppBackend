@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import jwt from "jsonwebtoken";
 import Patient from "../models/patient.js";
-import sendResponse, { sendError } from "./ResponseCtrl.js";
+import sendResponse, { sendBadRequest, sendNotFound } from "./ResponseCtrl.js";
 
 async function generateJWT(staff) {
     let data = {
@@ -51,7 +51,7 @@ export const loginWithPhoneAndOTP = async (req, res) => {
 
         })
         await newUser.save()
-            .catch(err => sendError(res, err, "Creting new user"));
+            .catch(err => sendBadRequest("Error while creating user", err, res));
     } else {
         user.loginAttempt = {
                 otp:otp,
@@ -72,28 +72,28 @@ export const verifyOTP = async (req, res) =>{
     let otp = req.body.otp;
 
     if (!phoneNumber || !otp) {
-        sendResponse(false, "Provide phone number and otp to verify", null, res);
+        sendBadRequest("Provide phone number and otp to verify", "Provide phone number and otp to verify", res);
         return;
     }
 
     const user = await Patient.findOne({mobileNumber:phoneNumber});
     if (!user){
-        sendResponse(false, "User not found", "", res);
+        sendNotFound("User not found", "User not found", res);
         return;
     }
 
     if (user.loginAttempt == null){
-        sendResponse(false, "Login was not initiated!", "", res);
+        sendBadRequest("Login attempt not initiated", "Login attempt not initiated", res);
         return;
     }
 
     if((Date.now() - user.loginAttempt.timestamp)/1000 > 180){
-        sendResponse(false, "OTP has expired!", "", res);
+        sendBadRequest("OTP has expired!", "OTP has expired!", res);
         return;
     }
 
     if (otp != user.loginAttempt.otp){
-        sendResponse(false, "Wrong OTP, try again", "", res);
+        sendBadRequest("Wrong OTP, try again", "Wrong OTP, try again", res);
         return;
     }
 
@@ -102,7 +102,6 @@ export const verifyOTP = async (req, res) =>{
         user.isNewUser = true;
     }
     await user.save();
-    //Todo: send only the field reqired
 
     let token = await generateJWT(user);
     let data = {

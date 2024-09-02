@@ -1,165 +1,186 @@
-import 'dotenv/config';
-import { defaultPageHeight, defaultPageType, defaultPageWidth } from "../config.js";
+import "dotenv/config";
+import {
+    defaultPageHeight,
+    defaultPageType,
+    defaultPageWidth,
+} from "../config.js";
 import HospitalsPatient from "../models/HospitalsPatient.js";
 import CareGuide from "../models/careGuide.js";
 import Case from "../models/case.js";
 import Page from "../models/page.js";
 import { uploadToPermanentStorage } from "../utils/FileUploader.js";
-import sendReponse, { sendError } from "./ResponseCtrl.js";
-
+import sendReponse, {
+    sendBadRequest,
+    sendNotFound
+} from "./ResponseCtrl.js";
 
 async function getPage(req, res) {
-    let hospitalId = req.hospitalId;
-    let pageNumber = req.body.pageNumber;
-    let width = defaultPageWidth;
-    let height = defaultPageHeight;
+  let hospitalId = req.hospitalId;
+  let pageNumber = req.body.pageNumber;
+  let width = defaultPageWidth;
+  let height = defaultPageHeight;
 
-
-    let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId });
-    if (page) {
-        sendReponse(true, "", page, res);
-        return;
-    }
-    sendReponse(false, "Page Does not exist", null, res);
+  let page = await Page.findOne({
+    pageNumber: pageNumber,
+    hospitalId: hospitalId,
+  });
+  if (page) {
+    sendReponse(true, "", page, res);
+    return;
+  }
+  sendNotFound("Page does not exist", "Page does not exist", res);
 }
 
 async function initialisePage(req, res) {
-    let hospitalId = req.hospitalId;
-    let pageNumber = req.body.pageNumber;
-    let width = defaultPageWidth;
-    let height = defaultPageHeight;
+  let hospitalId = req.hospitalId;
+  let pageNumber = req.body.pageNumber;
+  let width = defaultPageWidth;
+  let height = defaultPageHeight;
 
-    let page = await Page.findOne({
-        hospitalId: hospitalId,
-        pageNumber: pageNumber
-    }).catch(err => {
-        sendError(res, err, "Fetching page");
-        return;
-    });
+  let page = await Page.findOne({
+    hospitalId: hospitalId,
+    pageNumber: pageNumber,
+  }).catch((err) => {
+    sendBadRequest("Error while fetching page", err, res);
+    return;
+  });
 
-    if (page) {
-        let patientDetails;
-        if (page.hospitalPatientId) {
-            patientDetails = await HospitalsPatient.findOne({ _id: page.hospitalPatientId })
-                .catch(err => sendError(res, err, "Getting patient"));
-        }
-        let data = {
-            isNewPage: false,
-            page: page,
-            patient: patientDetails
-        }
-        sendReponse(true, "", data, res);
-    } else {
-        let mCase = new Case({
-            hospitalId: hospitalId,
-            creatorId: req.uid,
-            doctorId: req.uid, //Todo: This should be updated after adding associates
-            pageCount: 1,
-            pageNumbers: [pageNumber],
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-        });
-        await mCase.save().catch(err => sendError(res, err, "saving case"));
-        page = new Page({
-            caseId: mCase._id,
-            hospitalId: hospitalId,
-            creatorId: req.uid,
-            doctorId: req.uid,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            pageNumber: pageNumber,
-            width: width,
-            height: height,
-            pageType: defaultPageType,
-            points: []
-        });
-        await page.save().catch(err => {
-            sendError(res, err, "Saving Page");
-            return;
-        });
-        let data = {
-            isNewPage: true,
-            page: page
-        }
-        sendReponse(true, "", data, res);
+  if (page) {
+    let patientDetails;
+    if (page.hospitalPatientId) {
+      patientDetails = await HospitalsPatient.findOne({
+        _id: page.hospitalPatientId,
+      }).catch((err) =>
+        sendBadRequest("Error while fetching patient", err, res)
+      );
     }
+    let data = {
+      isNewPage: false,
+      page: page,
+      patient: patientDetails,
+    };
+    sendReponse(true, "", data, res);
+  } else {
+    let mCase = new Case({
+      hospitalId: hospitalId,
+      creatorId: req.uid,
+      doctorId: req.uid, //Todo: This should be updated after adding associates
+      pageCount: 1,
+      pageNumbers: [pageNumber],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    await mCase
+      .save()
+      .catch((err) => sendBadRequest("Error while saving case", err, res));
+    page = new Page({
+      caseId: mCase._id,
+      hospitalId: hospitalId,
+      creatorId: req.uid,
+      doctorId: req.uid,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      pageNumber: pageNumber,
+      width: width,
+      height: height,
+      pageType: defaultPageType,
+      points: [],
+    });
+    await page.save().catch((err) => {
+      sendBadRequest("Error while saving page", err, res);
+      return;
+    });
+    let data = {
+      isNewPage: true,
+      page: page,
+    };
+    sendReponse(true, "", data, res);
+  }
 }
 
 async function uploadPointsToPage(req, res) {
-    //calculate total time to process this request
-    let startTime = Date.now();
-    let pageNumber = req.body.pageNumber;
-    let hospitalId = req.hospitalId;
-    let pointsToAdd = req.body.pointsToAdd;
+  //calculate total time to process this request
+  let startTime = Date.now();
+  let pageNumber = req.body.pageNumber;
+  let hospitalId = req.hospitalId;
+  let pointsToAdd = req.body.pointsToAdd;
 
-    let page = await Page.findOne({ pageNumber: pageNumber, hospitalId: hospitalId }).catch(err => sendError(res, err, "Finding page"));
-    if (page) {
-        for (var i = 0; i < pointsToAdd.length; i++){
-            page.points.push(pointsToAdd[i]);
-        }
-        page.updatedAt = Date.now();
-        await page.save().catch(err => {
-            sendError(res, err, "Saving Page");
-            return;
-        });
-
-        if (page.caseId) {
-            Case.updateOne({ _id: page.caseId }, { updatedAt: Date.now() });
-        }
-        sendReponse(true, "Points saved successfully", {}, res);
-        return;
-    } else {
-        sendReponse(false, "Invalid page number", {hospitalId: hospitalId}, res);
-        return;
+  let page = await Page.findOne({
+    pageNumber: pageNumber,
+    hospitalId: hospitalId,
+  }).catch((err) => sendBadRequest("Error while fetching page", err, res));
+  if (page) {
+    for (var i = 0; i < pointsToAdd.length; i++) {
+      page.points.push(pointsToAdd[i]);
     }
+    page.updatedAt = Date.now();
+    await page.save().catch((err) => {
+      sendBadRequest("Error while saving page", err, res);
+      return;
+    });
+
+    if (page.caseId) {
+      Case.updateOne({ _id: page.caseId }, { updatedAt: Date.now() });
+    }
+    sendReponse(true, "Points saved successfully", {}, res);
+    return;
+  } else {
+    sendNotFound("Page does not exist", "Page does not exist", res);
+    return;
+  }
 }
 
 async function addAdditional(req, res) {
-    console.log(req.body);
-    const hospitalId = req.hospitalId;
-    const data = JSON.parse(req.body.data);
-    console.log(data);
-    const pageNumber = data.pageNumber;
-    
-    const filePath = "doctorUploads/" + hospitalId +"/"+ pageNumber;
-    let metaData = {
-        type: data.metaData.type,
-        ext: data.metaData.ext,
-        mime: data.metaData.mime,
-        fileName: data.metaData.fileName || "",
-        description: data.metaData.description || "",
-        uploader: req.uid,
-        uploadedAt: Date.now()
-    }
+  console.log(req.body);
+  const hospitalId = req.hospitalId;
+  const data = JSON.parse(req.body.data);
+  console.log(data);
+  const pageNumber = data.pageNumber;
 
-    const saveResult = await uploadToPermanentStorage(req.file.path, filePath, metaData)
-        .catch(err => sendError(res, err, "Saving to cloudinary"));
-    console.log("Save res");
-    console.log(saveResult);
+  const filePath = "doctorUploads/" + hospitalId + "/" + pageNumber;
+  let metaData = {
+    type: data.metaData.type,
+    ext: data.metaData.ext,
+    mime: data.metaData.mime,
+    fileName: data.metaData.fileName || "",
+    description: data.metaData.description || "",
+    uploader: req.uid,
+    uploadedAt: Date.now(),
+  };
 
-    const attachment = {
-        public_url: saveResult.publicUrl,
-        metaData,
-        details: {
-            name: data.metaData.fileName || "Doctor's Voice Attachment",
-            description: data.metaData.description || "Recorded Live"
-        },
-        directory: saveResult
-    }
+  const saveResult = await uploadToPermanentStorage(
+    req.file.path,
+    filePath,
+    metaData
+  ).catch((err) =>
+    sendBadRequest("Error while saving file to cloudinary", err, res)
+  );
+  console.log("Save res");
+  console.log(saveResult);
 
-    const page = await Page.findOne({ hospitalId: hospitalId, pageNumber: pageNumber });
-    const caseToUpdate = await Case.findOneAndUpdate(
-      { _id: page.caseId },
-      { $push: { additionals:  attachment} },
-      { new: true }
-    );
+  const attachment = {
+    public_url: saveResult.publicUrl,
+    metaData,
+    details: {
+      name: data.metaData.fileName || "Doctor's Voice Attachment",
+      description: data.metaData.description || "Recorded Live",
+    },
+    directory: saveResult,
+  };
 
-    const responseData = { uploadedFile: attachment, updatedCase: caseToUpdate };
-    
-    sendReponse(true, "File Uploaded Successfully", responseData, res);
+  const page = await Page.findOne({
+    hospitalId: hospitalId,
+    pageNumber: pageNumber,
+  });
+  const caseToUpdate = await Case.findOneAndUpdate(
+    { _id: page.caseId },
+    { $push: { additionals: attachment } },
+    { new: true }
+  );
 
-    
-    
+  const responseData = { uploadedFile: attachment, updatedCase: caseToUpdate };
+
+  sendReponse(true, "File Uploaded Successfully", responseData, res);
 }
 
 /*linkGuide function will get the hospitalId and pageNumber and guideId from the request
@@ -170,282 +191,327 @@ and append the CareGuide to additionals in the case associated with the page ide
 - we use mongoose and mongoDB to store the data
 */
 async function linkGuide(req, res) {
-    const hospitalId = req.hospitalId;
-    const pageNumber = req.body.pageNumber;
-    const guideId = req.body.guideId;
-    const creatorId = req.uid;
+  const hospitalId = req.hospitalId;
+  const pageNumber = req.body.pageNumber;
+  const guideId = req.body.guideId;
+  const creatorId = req.uid;
 
-    if (!guideId)
-        return sendReponse(false, "Guide id is required in request", {}, res);
-    if (!pageNumber)
-        return sendReponse(false, "Page number is required in request", {}, res);
-    
+  if (!guideId)
+    return sendBadRequest(
+      "Guide id is required in request",
+      "Guide id is required in request",
+      res
+    );
+  if (!pageNumber)
+    return sendBadRequest(
+      "Page number is required in request",
+      "Page number is required in request",
+      res
+    );
 
+  const guide = await CareGuide.findOne({ _id: guideId }).catch((err) =>
+    sendBadRequest("Error while finding guide", err, res)
+  );
 
-    const guide = await CareGuide.findOne({ _id: guideId })
-        .catch(err => sendError(res, err, "Finding guide"));
-    
-    if (!guide) {
-        sendReponse(false, "Guide not found", {}, res);
-        return;
-    }
+  if (!guide) {
+    sendNotFound("Guide not found", "Guide not found", res);
+    return;
+  }
 
-    const page = await Page.findOne({ hospitalId: hospitalId, pageNumber: pageNumber })
-        .catch(err => sendError(res, err, "Finding page"));
-    
-    if (!page) {
-        sendReponse(false, "Page not found, it may not have been initialised. Touch your page with your pen and wait for it to initialise first.", {}, res);
-        return;
-    }
-    
-    const caseId = page.caseId;
+  const page = await Page.findOne({
+    hospitalId: hospitalId,
+    pageNumber: pageNumber,
+  }).catch((err) => sendBadRequest("Error while finding page", err, res));
 
-    const additional = {
-        public_url: guide.url,
-        metaData: {
-            type: guide.type,
-            ext: guide.ext,
-            mime: guide.mime,
-            uploader: creatorId,
-            uploadedAt: Date.now()
-        },
-        details: {
-            name: guide.name,
-            description: guide.description,
-        }
-    }
+  if (!page) {
+    sendNotFound(
+      "Page not found, it may not have been initialised. Touch your page with your pen and wait for it to initialise first.",
+      "Page not found, it may not have been initialised. Touch your page with your pen and wait for it to initialise first",
+      res
+    );
+    return;
+  }
 
-    const caseToUpdate = await Case.findOneAndUpdate({ _id: caseId }, { $push: { additionals: additional } }, { new: true })
-        .catch(err => sendError(res, err, "Updating case"));
-    sendReponse(true, "Guide linked successfully", { updatedCase: caseToUpdate }, res);
+  const caseId = page.caseId;
+
+  const additional = {
+    public_url: guide.url,
+    metaData: {
+      type: guide.type,
+      ext: guide.ext,
+      mime: guide.mime,
+      uploader: creatorId,
+      uploadedAt: Date.now(),
+    },
+    details: {
+      name: guide.name,
+      description: guide.description,
+    },
+  };
+
+  const caseToUpdate = await Case.findOneAndUpdate(
+    { _id: caseId },
+    { $push: { additionals: additional } },
+    { new: true }
+  ).catch((err) => sendBadRequest("Error while updating case", err, res));
+  sendReponse(
+    true,
+    "Guide linked successfully",
+    { updatedCase: caseToUpdate },
+    res
+  );
 }
-
 
 async function addDetails(req, res) {
-    let mobileNumber = req.body.mobileNumber;
-    if (!mobileNumber) {
-        sendReponse(false, "Mobile number is required in request", [], res);
-        return;
-    }
-    let gender = req.body.gender;
-    let fullName = req.body.fullName;
-    let email = req.body.email;
-    let pageNumber = req.body.pageNumber;
-    let age = req.body.age;
+  let mobileNumber = req.body.mobileNumber;
+  if (!mobileNumber) {
+    sendBadRequest("Mobile number is required in request", "Mobile number is required in request", res);
+    return;
+  }
+  let gender = req.body.gender;
+  let fullName = req.body.fullName;
+  let email = req.body.email;
+  let pageNumber = req.body.pageNumber;
+  let age = req.body.age;
 
-    let doctorId = req.body.doctorId;
-    
-    let hospitalId = req.hospitalId;
-    let staffId = req.uid;
-    
+  let doctorId = req.body.doctorId;
 
-    //Todo: link to patient if patient is already available
-    let page = await Page.findOne({
-        pageNumber: pageNumber,
-        hospitalId: hospitalId
-     }).catch(err => sendError(res, err, "finding page"));
-    if (page) {
-        let mCase;
-        if (page.caseId) {
-            mCase = await Case.findOne({ _id: page.caseId }).catch(err => sendError(res, err, "finding case"));
-        } else {
-            mCase = new Case({
-                hospitalId: hospitalId,
-                creatorId: req.body.uid,
-                pageCount: 1,
-                pageNumbers: [pageNumber],
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-            });
-            await mCase.save().catch(err => sendError(res, err, "saving case"));
-            page.caseId = mCase.id;
-        }
-        if (mobileNumber) {
-            page.mobileNumber = mobileNumber;
-            mCase.mobileNumber = mobileNumber;
-        }
-        if (gender) {
-            page.gender = gender;
-            mCase.gender = gender;
-        }
-        if (fullName) {
-            page.fullName = fullName;
-            mCase.fullName = fullName;
-        }
-        if (email) {
-            page.email = email;
-            mCase.email = email;
-        }
-        if (doctorId) {
-            page.doctorId = doctorId;
-            mCase.doctorId = doctorId;
-        }
+  let hospitalId = req.hospitalId;
+  let staffId = req.uid;
 
-        let patient = new HospitalsPatient({
-            mobileNumber,
-            age, gender, email, fullName, hospitalId, doctorId,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            creatorId: staffId
-        });
-
-        await patient.save();
-
-        page.hospitalPatientId = patient._id;
-        mCase.hospitalPatientId = patient._id;
-        page.updatedAt = Date.now();
-        mCase.updatedAt = Date.now();
-
-        await page.save().catch(err => {
-            sendError(res, err, "Saving page");
-            return;
-        })
-
-        await mCase.save().catch(err => {
-            sendError(res, err, "Saving case");
-            return;
-        })
-        sendReponse(true, "Page saved successfully", {
-            patient: patient
-        }, res);
+  //Todo: link to patient if patient is already available
+  let page = await Page.findOne({
+    pageNumber: pageNumber,
+    hospitalId: hospitalId,
+  }).catch((err) => sendBadRequest("Error while finding page", err,res));
+  if (page) {
+    let mCase;
+    if (page.caseId) {
+      mCase = await Case.findOne({ _id: page.caseId }).catch((err) =>
+        sendBadRequest("Error while finding case", err, res));
+      
     } else {
-        sendReponse(false, "Page not found", {}, res);
+      mCase = new Case({
+        hospitalId: hospitalId,
+        creatorId: req.body.uid,
+        pageCount: 1,
+        pageNumbers: [pageNumber],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      await mCase.save().catch((err) => sendBadRequest("Error while saving case", err, res));
+      page.caseId = mCase.id;
     }
+    if (mobileNumber) {
+      page.mobileNumber = mobileNumber;
+      mCase.mobileNumber = mobileNumber;
+    }
+    if (gender) {
+      page.gender = gender;
+      mCase.gender = gender;
+    }
+    if (fullName) {
+      page.fullName = fullName;
+      mCase.fullName = fullName;
+    }
+    if (email) {
+      page.email = email;
+      mCase.email = email;
+    }
+    if (doctorId) {
+      page.doctorId = doctorId;
+      mCase.doctorId = doctorId;
+    }
+
+    let patient = new HospitalsPatient({
+      mobileNumber,
+      age,
+      gender,
+      email,
+      fullName,
+      hospitalId,
+      doctorId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      creatorId: staffId,
+    });
+
+    await patient.save();
+
+    page.hospitalPatientId = patient._id;
+    mCase.hospitalPatientId = patient._id;
+    page.updatedAt = Date.now();
+    mCase.updatedAt = Date.now();
+
+    await page.save().catch((err) => {
+        sendBadRequest("Error while saving page", err, res);
+      return;
+    });
+
+    await mCase.save().catch((err) => {
+        sendBadRequest("Error while saving case", err, res);
+      return;
+    });
+    sendReponse(
+      true,
+      "Page saved successfully",
+      {
+        patient: patient,
+      },
+      res
+    );
+  } else {
+    sendNotFound("Page not found", "Page not found", res);
+  }
 }
 
-async function changeCase(req, res) {
-    
-}
+async function changeCase(req, res) {}
 
 async function addMobileNumber(req, res) {
-    let hospitalId = req.hospitalId;
-    let mobileNumber = req.body.mobileNumber;
-    let pageNumber = req.body.pageNumber;
+  let hospitalId = req.hospitalId;
+  let mobileNumber = req.body.mobileNumber;
+  let pageNumber = req.body.pageNumber;
 
-    let page = await Page.findOne({
-        pageNumber: pageNumber,
-        hospitalId: hospitalId
-    }).catch(err => sendError(res, err, "finding page"));
-    
-    if (page) {
-        let mCase;
-        if (page.caseId) {
-            mCase = await Case.findOne({ _id: page.caseId }).catch(err => sendError(res, err, "finding case"));
-            mCase.mobileNumber = mobileNumber;
-            await mCase.save();
-        }
+  let page = await Page.findOne({
+    pageNumber: pageNumber,
+    hospitalId: hospitalId,
+  }).catch((err) => sendBadRequest("Error while finding page", err, res));
 
-        if (mobileNumber) {
-            page.mobileNumber = mobileNumber;
-            page.updatedAt = Date.now();
-        }
-
-        let hospitalPatients = await HospitalsPatient.find(
-            { mobileNumber: mobileNumber, hospitalId: hospitalId }
-        ).catch(err => sendError(res, err, "Finding Hospital's patient"));
-
-        for (const patient of hospitalPatients) {
-            const openCases = await Case.find({
-                hospitalPatient: patient._id,
-                isOpen: true
-            });
-
-            patient.openCases = openCases;
-        }
-
-        let data = {
-            patients: hospitalPatients
-        }
-
-        await page.save().catch(err => sendError(res, err, "Saving page"));
-        sendReponse(true, "Phone number linked and got related patients", data, res);
-
-    } else {
-        sendReponse(false, "Page not found", {}, res);
+  if (page) {
+    let mCase;
+    if (page.caseId) {
+      mCase = await Case.findOne({ _id: page.caseId }).catch((err) =>
+        sendBadRequest("Error while finding case", err, res)
+      );
+      mCase.mobileNumber = mobileNumber;
+      await mCase.save();
     }
 
+    if (mobileNumber) {
+      page.mobileNumber = mobileNumber;
+      page.updatedAt = Date.now();
+    }
+
+    let hospitalPatients = await HospitalsPatient.find({
+      mobileNumber: mobileNumber,
+      hospitalId: hospitalId,
+    }).catch((err) => sendBadRequest("Error while fetching hospital patients", err, res));
+
+    for (const patient of hospitalPatients) {
+      const openCases = await Case.find({
+        hospitalPatient: patient._id,
+        isOpen: true,
+      });
+
+      patient.openCases = openCases;
+    }
+
+    let data = {
+      patients: hospitalPatients,
+    };
+
+    await page.save().catch((err) => sendBadRequest("Error while saving page", err, res));
+    sendReponse(
+      true,
+      "Phone number linked and got related patients",
+      data,
+      res
+    );
+  } else {
+    sendNotFound("Page not found", "Page not found", res);
+  }
 }
 
 async function linkPage(req, res) {
-    console.log("link page called");
-    let hospitalPatientId = req.body.patientId;
-    let hospitalId = req.hospitalId;
-    let caseId = req.body.caseId;
-    let pageNumber = req.body.pageNumber;
+  console.log("link page called");
+  let hospitalPatientId = req.body.patientId;
+  let hospitalId = req.hospitalId;
+  let caseId = req.body.caseId;
+  let pageNumber = req.body.pageNumber;
 
-    let page = await Page.findOne({
-        pageNumber: pageNumber,
-        hospitalId: hospitalId
-    }).catch(err => sendError(res, err, "finding page"));
+  let page = await Page.findOne({
+    pageNumber: pageNumber,
+    hospitalId: hospitalId,
+  }).catch((err) => sendBadRequest("Error while finding page", err, res));
 
-    if (!caseId) {
-        let patient = await HospitalsPatient.findOne({ _id: hospitalPatientId })
-            .catch(err => sendError(res, err, "Getting Hospital Patient"));
-        const newCase = new Case({
-            hospitalId,
-            hospitalPatientId,
-            isOpen: true,
-            mobileNumber: patient.mobileNumber,
-            email: patient.email,
-            updatedAt: Date.now(),
-            fullName: patient.fullName,
-            gender: patient.gender,
-            pageNumbers:[],
-            doctorId: req.uid,
-            creatorId: req.uid,
-            pageCount: 0,
-            createdAt: Date.now()
-        });
+  if (!caseId) {
+    let patient = await HospitalsPatient.findOne({
+      _id: hospitalPatientId,
+    }).catch((err) => sendBadRequest("Error while finding hospital patient", err, res));
+    const newCase = new Case({
+      hospitalId,
+      hospitalPatientId,
+      isOpen: true,
+      mobileNumber: patient.mobileNumber,
+      email: patient.email,
+      updatedAt: Date.now(),
+      fullName: patient.fullName,
+      gender: patient.gender,
+      pageNumbers: [],
+      doctorId: req.uid,
+      creatorId: req.uid,
+      pageCount: 0,
+      createdAt: Date.now(),
+    });
+    await newCase.save();
+    caseId = newCase._id;
+  }
+
+  if (page) {
+    const prevCaseId = page.caseId;
+
+    page.caseId = caseId;
+    page.hospitalPatientId = hospitalPatientId;
+
+    if (prevCaseId != caseId) {
+      if (page.caseId) {
+        let oldCase = await Case.findOne({ _id: prevCaseId }).catch((err) =>
+            sendBadRequest("Error while finding case", err, res)
+        );
+
+        oldCase.pageCount -= 1;
+        oldCase.pageNumbers = oldCase.pageNumbers.filter(
+          (pn) => pn != pageNumber
+        );
+        if (oldCase.pageCount <= 0) {
+          await Case.findByIdAndDelete(prevCaseId);
+        } else {
+          await oldCase.save();
+        }
+      }
+
+      const newCase = await Case.findById(caseId);
+      if (newCase) {
+        newCase.pageCount += 1;
+        newCase.pageNumbers.push(pageNumber);
         await newCase.save();
-        caseId = newCase._id;
+      }
     }
 
-    if (page) {
-        const prevCaseId = page.caseId;
+    await page.save().catch((err) => sendBadRequest("Error while saving page", err, res));
 
-        page.caseId = caseId;
-        page.hospitalPatientId = hospitalPatientId;
+    let hospitalPatient = await HospitalsPatient.findOne({
+      _id: hospitalPatientId,
+    });
 
-            if (prevCaseId != caseId) {
-                if (page.caseId) {
-                    let oldCase = await Case.findOne({ _id:prevCaseId })
-                        .catch(err => sendError(res, err, "Geting case document"));
-                    
-                    oldCase.pageCount -= 1;
-                    oldCase.pageNumbers = oldCase.pageNumbers.filter(pn => pn != pageNumber);
-                    if (oldCase.pageCount <= 0) {
-                        await Case.findByIdAndDelete(prevCaseId); 
-                    } else {
-                        await oldCase.save();
-                    }
-
-                }
-
-                const newCase = await Case.findById(caseId);
-                if (newCase) {
-                    newCase.pageCount += 1;
-                    newCase.pageNumbers.push(pageNumber);
-                    await newCase.save();
-                }
-            }
-        
-        await page.save()
-            .catch(err => sendError(res, err, "Saving page"));
-
-        let hospitalPatient = await HospitalsPatient.findOne({ _id: hospitalPatientId });
-        
-        sendReponse(true, "patient linked", {patient: hospitalPatient}, res);
-    } else {
-        sendReponse(false, "Page not found", {}, res);
-    }
-    
+    sendReponse(true, "patient linked", { patient: hospitalPatient }, res);
+  } else {
+    sendNotFound("Page not found", "Page not found", res);
+  }
 }
-
-
 
 //Todo: make function to putDetails of mobile number and other stuff. Also if same phone number has the case merge two cases together.
 //Page(s) -> case -> make function to link pages together to a case. i.e merge cases.
 
-export { addAdditional, addDetails, addMobileNumber, changeCase, getPage, initialisePage, linkGuide, linkPage, uploadPointsToPage };
-
+export {
+    addAdditional,
+    addDetails,
+    addMobileNumber,
+    changeCase,
+    getPage,
+    initialisePage,
+    linkGuide,
+    linkPage,
+    uploadPointsToPage
+};
 
