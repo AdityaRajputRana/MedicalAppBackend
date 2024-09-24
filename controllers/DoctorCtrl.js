@@ -7,8 +7,8 @@ import Hospital from "../models/hostpital.js";
 import PageConfigMeta from "../models/pageConfigMeta.js";
 import Staff from "../models/staff.js";
 import sendReponse, {
-    sendBadRequest,
-    sendNotFound
+  sendBadRequest,
+  sendNotFound
 } from "./ResponseCtrl.js";
 
 export const getHome = async (req, res) => {
@@ -181,11 +181,21 @@ export const getPageConfig = async (req, res) => {
 
   let pageDetails;
   if (hospitalDetails) {
+    const pageConfigMeta = await PageConfigMeta.findOne({
+      hospitalId,
+      doctorId,
+    })
     pageDetails = {
       pageHeight: hospitalDetails.pageHeight,
       pageWidth: hospitalDetails.pageWidth,
       pageBackground: hospitalDetails.pageBackground,
     };
+
+    if (pageConfigMeta) {
+      pageDetails.configUrl = pageConfigMeta.configUrl;
+      pageDetails.__v=pageConfigMeta.__v;
+    }
+
   }
 
   let data = {
