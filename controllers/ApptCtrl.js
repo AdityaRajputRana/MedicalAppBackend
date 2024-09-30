@@ -12,11 +12,32 @@ import sendReponse, {
 export const createAppointment = async (req, res) => {
   try {
     const { patient_id, appt_date, appt_time, uid } = req.body;
+    creater_id = uid;
 
-    if (!patient_id || !appt_date || !appt_time || !uid) {
-      return res.status(400).json({ message: "All fields are required" });
+    // Check if all required fields are provided
+    if (!patient_id || !appt_date || !appt_time || !creator_id) {
+      return sendBadRequest(
+        "All fields are required",
+        {
+          missingFields: {
+            patient_id: !patient_id ? 'patient_id is required' : undefined,
+            appt_date: !appt_date ? 'appt_date is required' : undefined,
+            appt_time: !appt_time ? 'appt_time is required' : undefined,
+            creator_id: !creator_id ? 'creator_id is required' : undefined,
+          },
+        },
+        res
+      );
     }
 
+    // Check if `patient_id` and `creator_id` are valid Mongo ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(patient_id)) {
+      return sendBadRequest("Invalid patient_id", null, res);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(creator_id)) {
+      return sendBadRequest("Invalid creator_id", null, res);
+    }
     const newAppointment = new Appointment({
       patient_id,
       appt_date,
