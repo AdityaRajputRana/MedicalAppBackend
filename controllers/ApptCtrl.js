@@ -1,5 +1,6 @@
 // controllers/appointmentController.js
 
+import mongoose from "mongoose";
 import Appointment from "../models/appointment.js";
 import sendReponse, {
   sendBadRequest,
@@ -12,7 +13,7 @@ import sendReponse, {
 export const createAppointment = async (req, res) => {
   try {
     const { patient_id, appt_date, appt_time, uid } = req.body;
-    creater_id = uid;
+    const creator_id = req.uid;
 
     // Check if all required fields are provided
     if (!patient_id || !appt_date || !appt_time || !creator_id) {
@@ -42,7 +43,7 @@ export const createAppointment = async (req, res) => {
       patient_id,
       appt_date,
       appt_time,
-      creater_id,
+      creator_id,
     });
 
     const savedAppointment = await newAppointment.save();
