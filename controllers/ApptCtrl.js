@@ -42,7 +42,7 @@ export const createAppointment = async (req, res) => {
       patient_id,
       appt_date,
       appt_time,
-      uid,
+      creater_id,
     });
 
     const savedAppointment = await newAppointment.save();
