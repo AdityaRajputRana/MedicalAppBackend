@@ -11,9 +11,9 @@ import sendReponse, {
 // Create Appointment
 export const createAppointment = async (req, res) => {
   try {
-    const { patient_id, appt_date, appt_time, creator_id } = req.body;
+    const { patient_id, appt_date, appt_time, uid } = req.body;
 
-    if (!patient_id || !appt_date || !appt_time || !creator_id) {
+    if (!patient_id || !appt_date || !appt_time || !uid) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -21,7 +21,7 @@ export const createAppointment = async (req, res) => {
       patient_id,
       appt_date,
       appt_time,
-      creator_id,
+      uid,
     });
 
     const savedAppointment = await newAppointment.save();
@@ -36,7 +36,7 @@ export const createAppointment = async (req, res) => {
 export const editAppointment = async (req, res) => {
   try {
     const { id } = req.query; // Retrieve id from query parameters
-    const { patient_id, appt_date, appt_time, creator_id } = req.body;
+    const { patient_id, appt_date, appt_time, uid } = req.body;
 
     if (!id) {
       return sendBadRequest(
@@ -58,7 +58,7 @@ export const editAppointment = async (req, res) => {
     if (patient_id !== undefined) appointment.patient_id = patient_id;
     if (appt_date !== undefined) appointment.appt_date = appt_date;
     if (appt_time !== undefined) appointment.appt_time = appt_time;
-    if (creator_id !== undefined) appointment.creator_id = creator_id;
+    if (uid !== undefined) appointment.creator_id = uid;
 
     const updatedAppointment = await appointment.save();
     return sendReponse(
