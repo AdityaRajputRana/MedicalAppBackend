@@ -1,12 +1,12 @@
 import express from 'express';
 import multer from 'multer';
+import { createAppointment, deleteAppointment, editAppointment, getAppointment } from '../controllers/ApptCtrl.js';
 import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, updatePageConfigMetadata, viewPatient } from '../controllers/DoctorCtrl.js';
 import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
 import '../controllers/PageCtrl.js';
 import { addAdditional, addDetails, addMobileNumber, changeCase, getPage, initialisePage, linkGuide, linkPage, uploadPointsToPage } from '../controllers/PageCtrl.js';
 import AuthorizationMW from '../middleware/authorizationMW.js';
-import { createAppointment, deleteAppointment, editAppointment } from '../controllers/ApptCtrl.js';
 
 const APIRouter = express.Router();
 APIRouter.use(AuthorizationMW);
@@ -22,10 +22,11 @@ APIRouter.post("/guides/addVideo", addVideoGuide);
 APIRouter.post("/guides/setPosition", setGuidePosition);
 APIRouter.post("/guides/list", getGuidesList);
 
-
-APIRouter.post('/appointments', createAppointment);
-APIRouter.put('/appointments', editAppointment);
-APIRouter.delete('/appointments', deleteAppointment);
+//chained the api routes
+APIRouter.post('/appointments', createAppointment)
+.put('/appointments', editAppointment)
+.delete('/appointments', deleteAppointment)
+.get("/appointments", getAppointment);
 
 
 APIRouter.post("/page/initialize", initialisePage);

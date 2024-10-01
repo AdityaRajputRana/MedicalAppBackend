@@ -2,7 +2,7 @@
 
 import mongoose from "mongoose";
 import Appointment from "../models/appointment.js";
-import sendReponse, {
+import sendResponse, {
   sendBadRequest,
   sendCreated,
   sendInternalError,
@@ -12,7 +12,7 @@ import sendReponse, {
 // Create Appointment
 export const createAppointment = async (req, res) => {
   try {
-    const { patient_id, appt_date, appt_time, uid } = req.body;
+    const { patient_id, appt_date, appt_time} = req.body;
     const creator_id = req.uid;
 
     // Check if all required fields are provided
@@ -122,5 +122,62 @@ export const deleteAppointment = async (req, res) => {
   } catch (error) {
     console.error(error);
     return sendInternalError(error.message, error, res);
+  }
+};
+
+// function to find the time slot for next 30 minutes
+const timeSlotCalculator = (startTime) => {
+  let [hours, minutes] = startTime.split(":").map(Number);
+  minutes += 30;
+  if (minutes >= 60) {
+    minutes -= 60;
+    hours += 1;
+  }
+  // Pad minutes to ensure double digits (e.g., 09 instead of 9)
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${hours}:${formattedMinutes}`;
+}
+
+// Function to convert time to 12-hour format
+const timeConverter = (time) => {
+  let [hours, minutes] = time.split(":").map(Number);
+  const AmPm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes.toString().padStart(2, '0')} ${AmPm}`;
+}
+
+
+// Get Appointments
+export const getAppointment = async (req, res) => {
+  try {
+    const { appt_date } = req.query;
+    const formatted_date = new Date(appt_date); 
+    const doctor_Id = req.uid;
+
+    // Find appointments and populate patient details
+    const appointment_data = await Appointment.find({
+      creator_id: doctor_Id,
+      appt_date: formatted_date,
+    }).populate('patient_id', 'fullName lastVisit'); // Populate only necessary fields
+
+    console.log("Appointment data:", appointment_data);
+    
+    // If no appointments are found
+    if (!appointment_data.length) {
+      return sendResponse(false, "No appointments found", [], res);
+    }
+    // Map over appointment data and build the final response
+    const final_response = appointment_data.map((element) => ({
+      patient_id: element.patient_id._id, // Populated patient id
+      fullName: element.patient_id.fullName, // Populated patient name
+      lastVisit: element.patient_id.lastVisit, // Populated patient last visit
+      appointment_time: `${timeConverter(element.appt_time)} - ${timeConverter(timeSlotCalculator(element.appt_time))}`, // Appointment time
+    }));
+
+    return sendResponse(true, "Appointments fetched successfully", final_response, res);
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    return sendInternalError("Failed to fetch appointments", error, res); // Improved error handling
   }
 };
