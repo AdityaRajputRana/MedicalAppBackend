@@ -169,10 +169,12 @@ export const getAppointment = async (req, res) => {
     }
     // Map over appointment data and build the final response
     const final_response = appointment_data.map((element) => ({
+      _id:element._id,
+      appt_time: `${timeConverter(element.appt_time)} - ${timeConverter(timeSlotCalculator(element.appt_time))}`, // Appointment time
       patient_id: element.patient_id._id, // Populated patient id
-      fullName: element.patient_id.fullName, // Populated patient name
+      full_name: element.patient_id.fullName, // Populated patient name
       lastVisit: element.patient_id.lastVisit, // Populated patient last visit
-      appointment_time: `${timeConverter(element.appt_time)} - ${timeConverter(timeSlotCalculator(element.appt_time))}`, // Appointment time
+      createdAt:element.createdAt,
     }));
 
     return sendResponse(true, "Appointments fetched successfully", final_response, res);
