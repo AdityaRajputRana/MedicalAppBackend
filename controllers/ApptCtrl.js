@@ -187,35 +187,60 @@ const timeConverter = (time) => {
 // Get Appointments
 export const getAppointment = async (req, res) => {
   try {
-    const { appt_date } = req.query;
+    const { appt_date, pageNumber = 1 } = req.query;
     const formatted_date = new Date(appt_date); 
     const doctor_Id = req.uid;
+    const paginationLimit = 10; // Set your pagination limit here
 
-    // Find appointments and populate patient details
-    const appointment_data = await Appointment.find({
+    // Ensure pageNumber is at least 1
+    const page = Math.max(1, parseInt(pageNumber));
+
+    // Build the query
+    const query = {
       creator_id: doctor_Id,
       appt_date: formatted_date,
-    }).populate('patient_id', 'fullName lastVisit'); // Populate only necessary fields
+    };
+
+    // Count total documents for pagination purposes
+    const totalCount = await Appointment.countDocuments(query);
+    
+    // Find appointments with pagination and populate patient details
+    const appointment_data = await Appointment.find(query)
+      .sort({ updatedAt: -1 }) // Sorting by most recent
+      .skip((page - 1) * paginationLimit) // Skip the appropriate number of documents
+      .limit(paginationLimit) // Limit the results to the pagination limit
+      .populate('patient_id', 'fullName lastVisit'); // Populate only necessary fields
 
     // If no appointments are found
     if (!appointment_data.length) {
       return sendResponse(false, "No appointments found", [], res);
     }
+
     // Map over appointment data and build the final response
     const final_response = appointment_data.map((element) => ({
-      _id:element._id,
+      _id: element._id,
       appt_date: element.appt_date, // Appointment date
       appt_time: `${timeConverter(element.appt_time)} - ${timeConverter(timeSlotCalculator(element.appt_time))}`, // Appointment time
       patient_id: element.patient_id._id, // Populated patient id
       fullName: element.patient_id.fullName, // Populated patient name
       lastVisit: element.patient_id.lastVisit, // Populated patient last visit
-      createdAt:element.createdAt,
-      editor_id:element.editor_id
+      createdAt: element.createdAt,
+      editor_id: element.editor_id
     }));
 
-    return sendResponse(true, "Appointments fetched successfully", final_response, res);
+    // Calculate total pages for pagination
+    const totalPages = Math.ceil(totalCount / paginationLimit);
+
+    // Structure response data for pagination
+    const responseData = {
+      appointments: final_response,
+      totalPages,
+      currentPage: page,
+    };
+
+    return sendResponse(true, "Appointments fetched successfully", responseData, res);
   } catch (error) {
     console.error("Error fetching appointments:", error);
-    return sendInternalError("Failed to fetch appointments", error, res); // Improved error handling
+    return sendInternalError("Failed to fetch appointments", error, res);
   }
 };
