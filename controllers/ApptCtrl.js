@@ -57,7 +57,6 @@ export const createAppointment = async (req, res) => {
       editor_id: populatedAppointment.editor_id || null,
       createdAt: populatedAppointment.createdAt,
     };
-    console.log("New appointment:", appointmentData);
     sendCreated("Appointment created successfully", appointmentData, res);
   } catch (error) {
     console.error(error);
@@ -123,7 +122,6 @@ export const editAppointment = async (req, res) => {
       createdAt: populatedAppointment.createdAt,
     };
 
-    console.log("Updated appointment:", appointmentData);
     sendResponse(true, "Appointment updated successfully", appointmentData, res);
   } catch (error) {
     console.error(error);
@@ -199,8 +197,6 @@ export const getAppointment = async (req, res) => {
       appt_date: formatted_date,
     }).populate('patient_id', 'fullName lastVisit'); // Populate only necessary fields
 
-    console.log("Appointment data:", appointment_data);
-    
     // If no appointments are found
     if (!appointment_data.length) {
       return sendResponse(false, "No appointments found", [], res);
