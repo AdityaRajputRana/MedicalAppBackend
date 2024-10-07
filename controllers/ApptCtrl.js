@@ -287,6 +287,8 @@ export const getUpcomingAppointments = async (req, res) => {
         $gte: `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`
       }
     };
+    console.log("Query", query);
+    
 
     // Find upcoming appointments sorted by appointment time
     const upcoming_appointments = await Appointment.find(query)
