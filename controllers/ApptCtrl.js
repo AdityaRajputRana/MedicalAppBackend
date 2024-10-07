@@ -1,5 +1,6 @@
 // controllers/appointmentController.js
 
+import moment from "moment-timezone";
 import mongoose from "mongoose";
 import Appointment from "../models/appointment.js";
 import sendResponse, {
@@ -8,7 +9,6 @@ import sendResponse, {
   sendInternalError,
   sendNotFound,
 } from "./ResponseCtrl.js";
-import moment from 'moment-timezone';
 
 // Create Appointment
 export const createAppointment = async (req, res) => {
@@ -266,28 +266,23 @@ export const getUpcomingAppointments = async (req, res) => {
   try {
     const doctor_Id = req.uid;
     const paginationLimit = 5; // Limit to top 5 upcoming appointments
-    const currentDate = new Date();
+     // Get today's date without time
+     const currentDate = moment.utc();
+     const istNow = currentDate.tz('Asia/Kolkata');
+ 
+     // Get current time in HH:mm format
+     const currentTime = istNow.format('HH:mm');
+     const today =istNow.startOf('day').format('YYYY-MM-DD');
+ 
+     // Build the query to find upcoming appointments for today
+     const query = {
+       creator_id: doctor_Id,
+       appt_date: today, // Appointments for today
+       appt_time: { $gte: currentTime } // Later than the current time
+     };
 
-    // Get today's date without time
-    const today = new Date(currentDate.setHours(0, 0, 0, 0));
-
-    // Get the current time in hours and minutes for comparison
-    const currentTime = new Date();
-    const currentHours = currentTime.getHours();
-    const currentMinutes = currentTime.getMinutes();
-
-    // Build the query to find upcoming appointments
-    const query = {
-      creator_id: doctor_Id,
-      appt_date: {
-        $gte: today // Start of today
-      },
-      appt_time: {
-        // Match appointments that are later than the current time
-        $gte: `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`
-      }
-    };
-    console.log("Query", query);
+ 
+     console.log("Query", query);
     
 
     // Find upcoming appointments sorted by appointment time
