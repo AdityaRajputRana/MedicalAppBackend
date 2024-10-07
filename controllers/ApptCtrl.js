@@ -215,7 +215,7 @@ export const getAppointment = async (req, res) => {
 
     // Find appointments with pagination and populate patient details
     const appointment_data = await Appointment.find(query)
-      .sort({  appt_time: 1  }) // Sorting by most recent
+      .sort({ appt_time: 1 }) // Sorting by most recent
       .skip((page - 1) * paginationLimit) // Skip the appropriate number of documents
       .limit(paginationLimit) // Limit the results to the pagination limit
       .populate("patient_id", "fullName lastVisit"); // Populate only necessary fields
@@ -266,31 +266,26 @@ export const getUpcomingAppointments = async (req, res) => {
   try {
     const doctor_Id = req.uid;
     const paginationLimit = 5; // Limit to top 5 upcoming appointments
-     // Get today's date without time
-     const currentDate = moment.utc();
-     const istNow = currentDate.tz('Asia/Kolkata');
- 
-     // Get current time in HH:mm format
-     const currentTime = istNow.format('HH:mm');
-     const today =istNow.startOf('day').format('YYYY-MM-DD');
- 
-     // Build the query to find upcoming appointments for today
-     const query = {
-       creator_id: doctor_Id,
-       appt_date: today, // Appointments for today
-       appt_time: { $gte: currentTime } // Later than the current time
-     };
+    // Get today's date without time
+    const currentDate = moment.utc();
+    const istNow = currentDate.tz("Asia/Kolkata");
 
- 
-     console.log("Query", query);
-    
+    // Get current time in HH:mm format
+    const currentTime = istNow.format("HH:mm");
+    const today = istNow.startOf("day").format("YYYY-MM-DD");
+
+    // Build the query to find upcoming appointments for today
+    const query = {
+      creator_id: doctor_Id,
+      appt_date: today, // Appointments for today
+      appt_time: { $gte: currentTime }, // Later than the current time
+    };
 
     // Find upcoming appointments sorted by appointment time
     const upcoming_appointments = await Appointment.find(query)
       .sort({ appt_date: 1, appt_time: 1 }) // Sort by date and time
       .limit(paginationLimit) // Limit the results to 5
       .populate("patient_id", "fullName lastVisit"); // Populate only necessary fields
-
 
     // If no upcoming appointments are found
     if (!upcoming_appointments.length) {
@@ -319,6 +314,10 @@ export const getUpcomingAppointments = async (req, res) => {
     );
   } catch (error) {
     console.error("Error fetching upcoming appointments:", error);
-    return sendInternalError("Failed to fetch upcoming appointments", error, res);
+    return sendInternalError(
+      "Failed to fetch upcoming appointments",
+      error,
+      res
+    );
   }
 };
