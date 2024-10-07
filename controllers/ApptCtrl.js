@@ -215,7 +215,7 @@ export const getAppointment = async (req, res) => {
 
     // Find appointments with pagination and populate patient details
     const appointment_data = await Appointment.find(query)
-      .sort({ updatedAt: -1 }) // Sorting by most recent
+      .sort({  appt_time: 1  }) // Sorting by most recent
       .skip((page - 1) * paginationLimit) // Skip the appropriate number of documents
       .limit(paginationLimit) // Limit the results to the pagination limit
       .populate("patient_id", "fullName lastVisit"); // Populate only necessary fields
