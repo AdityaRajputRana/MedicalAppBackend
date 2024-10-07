@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { createAppointment, deleteAppointment, editAppointment, getAppointment } from '../controllers/ApptCtrl.js';
+import { createAppointment, deleteAppointment, editAppointment, getAppointment, getUpcomingAppointments } from '../controllers/ApptCtrl.js';
 import { generateCasePDF, getCasesHistory, mergeCases, submitCase, viewCase } from '../controllers/CaseCtrl.js';
 import { addNewPatient, getHome, getPageConfig, getPageConfigMetadata, getPatientHistory, updatePageConfigMetadata, viewPatient } from '../controllers/DoctorCtrl.js';
 import { addVideoGuide, getGuidesList, setGuidePosition } from '../controllers/GuideCtrl.js';
@@ -26,7 +26,9 @@ APIRouter.post("/guides/list", getGuidesList);
 APIRouter.post('/appointments', createAppointment)
 .put('/appointments', editAppointment)
 .delete('/appointments', deleteAppointment)
-.get("/appointments", getAppointment);
+.get("/appointments", getAppointment)
+.get("/upcoming_appointments", getUpcomingAppointments);
+
 
 
 APIRouter.post("/page/initialize", initialisePage);

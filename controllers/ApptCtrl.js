@@ -8,11 +8,12 @@ import sendResponse, {
   sendInternalError,
   sendNotFound,
 } from "./ResponseCtrl.js";
+import moment from 'moment-timezone';
 
 // Create Appointment
 export const createAppointment = async (req, res) => {
   try {
-    const { patient_id, appt_date, appt_time} = req.body;
+    const { patient_id, appt_date, appt_time } = req.body;
     const creator_id = req.uid;
 
     // Check if all required fields are provided
@@ -21,10 +22,10 @@ export const createAppointment = async (req, res) => {
         "All fields are required",
         {
           missingFields: {
-            patient_id: !patient_id ? 'patient_id is required' : undefined,
-            appt_date: !appt_date ? 'appt_date is required' : undefined,
-            appt_time: !appt_time ? 'appt_time is required' : undefined,
-            creator_id: !creator_id ? 'creator_id is required' : undefined,
+            patient_id: !patient_id ? "patient_id is required" : undefined,
+            appt_date: !appt_date ? "appt_date is required" : undefined,
+            appt_time: !appt_time ? "appt_time is required" : undefined,
+            creator_id: !creator_id ? "creator_id is required" : undefined,
           },
         },
         res
@@ -47,11 +48,14 @@ export const createAppointment = async (req, res) => {
     });
 
     const savedAppointment = await newAppointment.save();
-    const populatedAppointment = await savedAppointment.populate('patient_id', 'fullName lastVisit');
+    const populatedAppointment = await savedAppointment.populate(
+      "patient_id",
+      "fullName lastVisit"
+    );
     const appointmentData = {
       _id: populatedAppointment._id,
-      patient_id: populatedAppointment.patient_id._id,  // Keeping patient_id as a string
-      fullName: populatedAppointment.patient_id.fullName,  // Extract fullName to top level
+      patient_id: populatedAppointment.patient_id._id, // Keeping patient_id as a string
+      fullName: populatedAppointment.patient_id.fullName, // Extract fullName to top level
       appt_date: populatedAppointment.appt_date,
       appt_time: populatedAppointment.appt_time,
       editor_id: populatedAppointment.editor_id || null,
@@ -77,8 +81,8 @@ export const editAppointment = async (req, res) => {
         "Appointment ID and editor ID are required",
         {
           missingFields: {
-            id: !id ? 'Appointment ID is required' : undefined,
-            editor_id: !editor_id ? 'Editor ID is required' : undefined,
+            id: !id ? "Appointment ID is required" : undefined,
+            editor_id: !editor_id ? "Editor ID is required" : undefined,
           },
         },
         res
@@ -111,7 +115,10 @@ export const editAppointment = async (req, res) => {
     const updatedAppointment = await appointment.save();
 
     // Populate related fields (e.g., patient details)
-    const populatedAppointment = await updatedAppointment.populate('patient_id', 'fullName lastVisit');
+    const populatedAppointment = await updatedAppointment.populate(
+      "patient_id",
+      "fullName lastVisit"
+    );
     const appointmentData = {
       _id: populatedAppointment._id,
       patient_id: populatedAppointment.patient_id._id, // Keeping patient_id as a string
@@ -122,14 +129,17 @@ export const editAppointment = async (req, res) => {
       createdAt: populatedAppointment.createdAt,
     };
 
-    sendResponse(true, "Appointment updated successfully", appointmentData, res);
+    sendResponse(
+      true,
+      "Appointment updated successfully",
+      appointmentData,
+      res
+    );
   } catch (error) {
     console.error(error);
     return sendInternalError(error.message, error, res);
   }
 };
-
-
 
 // Delete Appointment
 export const deleteAppointment = async (req, res) => {
@@ -170,25 +180,24 @@ const timeSlotCalculator = (startTime) => {
     hours += 1;
   }
   // Pad minutes to ensure double digits (e.g., 09 instead of 9)
-  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, "0");
 
   return `${hours}:${formattedMinutes}`;
-}
+};
 
 // Function to convert time to 12-hour format
 const timeConverter = (time) => {
   let [hours, minutes] = time.split(":").map(Number);
   const AmPm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12 || 12;
-  return `${hours}:${minutes.toString().padStart(2, '0')} ${AmPm}`;
-}
-
+  return `${hours}:${minutes.toString().padStart(2, "0")} ${AmPm}`;
+};
 
 // Get Appointments
 export const getAppointment = async (req, res) => {
   try {
     const { appt_date, pageNumber = 1 } = req.query;
-    const formatted_date = new Date(appt_date); 
+    const formatted_date = new Date(appt_date);
     const doctor_Id = req.uid;
     const paginationLimit = 10; // Set your pagination limit here
 
@@ -203,13 +212,13 @@ export const getAppointment = async (req, res) => {
 
     // Count total documents for pagination purposes
     const totalCount = await Appointment.countDocuments(query);
-    
+
     // Find appointments with pagination and populate patient details
     const appointment_data = await Appointment.find(query)
       .sort({ updatedAt: -1 }) // Sorting by most recent
       .skip((page - 1) * paginationLimit) // Skip the appropriate number of documents
       .limit(paginationLimit) // Limit the results to the pagination limit
-      .populate('patient_id', 'fullName lastVisit'); // Populate only necessary fields
+      .populate("patient_id", "fullName lastVisit"); // Populate only necessary fields
 
     // If no appointments are found
     if (!appointment_data.length) {
@@ -220,12 +229,14 @@ export const getAppointment = async (req, res) => {
     const final_response = appointment_data.map((element) => ({
       _id: element._id,
       appt_date: element.appt_date, // Appointment date
-      appt_time: `${timeConverter(element.appt_time)} - ${timeConverter(timeSlotCalculator(element.appt_time))}`, // Appointment time
+      appt_time: `${timeConverter(element.appt_time)} - ${timeConverter(
+        timeSlotCalculator(element.appt_time)
+      )}`, // Appointment time
       patient_id: element.patient_id._id, // Populated patient id
       fullName: element.patient_id.fullName, // Populated patient name
       lastVisit: element.patient_id.lastVisit, // Populated patient last visit
       createdAt: element.createdAt,
-      editor_id: element.editor_id
+      editor_id: element.editor_id,
     }));
 
     // Calculate total pages for pagination
@@ -238,9 +249,79 @@ export const getAppointment = async (req, res) => {
       currentPage: page,
     };
 
-    return sendResponse(true, "Appointments fetched successfully", responseData, res);
+    return sendResponse(
+      true,
+      "Appointments fetched successfully",
+      responseData,
+      res
+    );
   } catch (error) {
     console.error("Error fetching appointments:", error);
     return sendInternalError("Failed to fetch appointments", error, res);
+  }
+};
+
+//Upcoming Appointments
+export const getUpcomingAppointments = async (req, res) => {
+  try {
+    const doctor_Id = req.uid;
+    const paginationLimit = 5; // Limit to top 5 upcoming appointments
+    const currentDate = new Date();
+
+    // Get today's date without time
+    const today = new Date(currentDate.setHours(0, 0, 0, 0));
+
+    // Get the current time in hours and minutes for comparison
+    const currentTime = new Date();
+    const currentHours = currentTime.getHours();
+    const currentMinutes = currentTime.getMinutes();
+
+    // Build the query to find upcoming appointments
+    const query = {
+      creator_id: doctor_Id,
+      appt_date: {
+        $gte: today // Start of today
+      },
+      appt_time: {
+        // Match appointments that are later than the current time
+        $gte: `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`
+      }
+    };
+
+    // Find upcoming appointments sorted by appointment time
+    const upcoming_appointments = await Appointment.find(query)
+      .sort({ appt_date: 1, appt_time: 1 }) // Sort by date and time
+      .limit(paginationLimit) // Limit the results to 5
+      .populate("patient_id", "fullName lastVisit"); // Populate only necessary fields
+
+
+    // If no upcoming appointments are found
+    if (!upcoming_appointments.length) {
+      return sendResponse(false, "No upcoming appointments found", [], res);
+    }
+
+    // Map over upcoming appointment data and build the final response
+    const final_response = upcoming_appointments.map((element) => ({
+      _id: element._id,
+      appt_date: element.appt_date, // Appointment date
+      appt_time: `${timeConverter(element.appt_time)} - ${timeConverter(
+        timeSlotCalculator(element.appt_time)
+      )}`, // Appointment time
+      patient_id: element.patient_id._id, // Populated patient id
+      fullName: element.patient_id.fullName, // Populated patient name
+      lastVisit: element.patient_id.lastVisit, // Populated patient last visit
+      createdAt: element.createdAt,
+      editor_id: element.editor_id,
+    }));
+
+    return sendResponse(
+      true,
+      "Upcoming appointments fetched successfully",
+      final_response,
+      res
+    );
+  } catch (error) {
+    console.error("Error fetching upcoming appointments:", error);
+    return sendInternalError("Failed to fetch upcoming appointments", error, res);
   }
 };
